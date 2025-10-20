@@ -1,0 +1,419 @@
+/* src/index.css */
+
+/* --- 1. Global Styles & Variables --- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #6a5acd; /* A nice, modern purple */
+  --primary-hover: #5a4ab9;
+  --secondary-color: #f0f2f5;
+  --text-dark: #333;
+  --text-light: #666;
+  --border-color: #e0e0e0;
+  --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  --font-family: 'Poppins', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: #fff;
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* --- 2. Main Layout (App, Navbar, Footer) --- */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex-grow: 1; /* Pushes footer to the bottom */
+  padding-bottom: 4rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Navbar */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+header h2 {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+header ul {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+header ul li {
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+header ul li a, header ul li {
+  text-decoration: none;
+  color: var(--text-dark);
+}
+
+header ul li a:hover, header ul li:hover {
+  color: var(--primary-color);
+}
+
+.logout-btn {
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: var(--primary-hover);
+}
+
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 1.5rem;
+  background-color: var(--text-dark);
+  color: #fff;
+  margin-top: auto;
+}
+
+/* --- 3. Recipe Cards (Recpitems Component) --- */
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.recipe-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+
+.recipe-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.recipe-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.recipe-card-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.recipe-card-content h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.recipe-card-content .description {
+  font-size: 0.9rem;
+  color: var(--text-light);
+  flex-grow: 1;
+  margin-bottom: 1rem;
+}
+
+.recipe-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.like-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.like-section .heart-icon {
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+/* --- 4. Forms & Modal --- */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  width: 90%;
+  max-width: 450px;
+  border: none;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-control {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-control label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.form input, .form textarea, .form select {
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form input:focus, .form textarea:focus, .form select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.2);
+}
+
+.form button {
+  padding: 0.9rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.form button:hover {
+  background: var(--primary-hover);
+}
+
+.form button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* --- 5. Recipe Detail Page --- */
+.recipe-detail-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 20px;
+}
+
+.recipe-detail-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.recipe-detail-header .description {
+  font-size: 1.1rem;
+  color: var(--text-light);
+  margin-bottom: 2rem;
+}
+
+.recipe-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-light);
+}
+
+.author-controls {
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.edit-btn, .delete-btn {
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: #fff;
+}
+
+.edit-btn { background-color: #007bff; }
+.edit-btn:hover { background-color: #0056b3; }
+.delete-btn { background-color: #dc3545; }
+.delete-btn:hover { background-color: #c82333; }
+
+
+.recipe-detail-main img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  max-height: 500px;
+  object-fit: cover;
+}
+
+.recipe-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+}
+
+.ingredients-section, .instructions-section {
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+.ingredients-section {
+  background: var(--secondary-color);
+}
+
+.ingredients-section h2, .instructions-section h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.ingredients-section div, .instructions-section div {
+  white-space: pre-line; /* Respect new lines */
+  line-height: 2;
+}
+
+/* --- 6. Home Page Header --- */
+.home-header {
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #6a5acd 0%, #a27cf3 100%);
+  color: white;
+  text-align: center;
+  border-radius: 0 0 25px 25px;
+  margin-bottom: 2rem;
+}
+
+.home-header h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto 1.5rem auto;
+}
+
+.filter-controls input, .filter-controls select {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  outline: none;
+  width: auto;
+  min-width: 200px;
+}
+.filter-controls input {
+  flex-grow: 1;
+  max-width: 400px;
+}
+
+/* --- 7. Responsive Design --- */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .home-header h1 {
+    font-size: 2rem;
+  }
+
+  .recipe-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal {
+    padding: 1.5rem;
+  }
+}
