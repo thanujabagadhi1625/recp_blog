@@ -124,7 +124,7 @@ const editRecipe = async (req, res) => {
     }
 };
 
-// --- 5. DELETE RECIPE ---
+
 const deleteRecipe = async (req, res) => {
     try {
         const recipe = await Recipe.findById(req.params.id);
@@ -140,11 +140,11 @@ const deleteRecipe = async (req, res) => {
         return res.status(200).json({ message: 'Recipe deleted' });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: 'Error in deleting the recipe' });
     }
 };
 
-// --- 6. LIKE RECIPE ---
+
 const likeRecipe = async (req, res) => {
     try {
         const recipe = await Recipe.findById(req.params.id);
