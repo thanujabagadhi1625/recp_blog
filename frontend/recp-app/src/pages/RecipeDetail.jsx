@@ -152,7 +152,21 @@ const RecipeDetail = () => {
             <div className="recipe-stats">
                 <div className="stat-item">
                     <img src={recipe.userId?.avatar || "https://via.placeholder.com/150"} alt={recipe.author} style={{ width: "40px", height: "40px", borderRadius: "50%" }}/>
-                    <strong>{recipe.author}</strong>
+                    <strong>{(() => {
+                        // If the author appears to be an email and the current user is not the owner, mask it
+                        const author = recipe.userId?.email || recipe.author;
+                        if (author && author.includes('@')) {
+                          if (user && recipe.userId && user.id === recipe.userId._id) {
+                            return author;
+                          }
+                          const parts = author.split('@');
+                          const namePart = parts[0];
+                          const domain = parts[1];
+                          const visible = namePart.slice(0,2);
+                          return `${visible}${"*".repeat(Math.max(2, namePart.length-2))}@${domain}`;
+                        }
+                        return recipe.author;
+                    })()}</strong>
                 </div>
                 <div className="stat-item"><FaClock /> {recipe.prepTime} min (Prep)</div>
                 <div className="stat-item"><FaClock /> {recipe.cookTime} min (Cook)</div>

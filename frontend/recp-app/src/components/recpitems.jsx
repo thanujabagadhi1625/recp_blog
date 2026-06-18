@@ -11,6 +11,15 @@ function Recpitems({ recipes, onUpdate }) {
   if (!recipes || recipes.length === 0)
     return <h2 style={{textAlign: 'center', marginTop: '80px', color: '#666', fontSize: '24px'}}>No recipes found 🍳</h2>;
 
+  const maskEmail = (text) => {
+    if (!text || !text.includes('@')) return text;
+    const parts = text.split('@');
+    const namePart = parts[0];
+    const domain = parts[1];
+    const visible = namePart.slice(0, 2);
+    return `${visible}${"*".repeat(Math.max(2, namePart.length-2))}@${domain}`;
+  };
+
   const handleLike = async (recipeId, e) => {
     e.preventDefault();
     e.stopPropagation(); // Prevent navigating when clicking the heart
@@ -47,7 +56,7 @@ function Recpitems({ recipes, onUpdate }) {
               <div className="recipe-card-footer">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <FaUser />
-                  <span>{item.author}</span>
+                  <span>{item.author && item.author.includes('@') ? maskEmail(item.author) : item.author}</span>
                 </div>
                 <div className="like-section">
                   <FaHeart
