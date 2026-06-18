@@ -97,7 +97,7 @@ const sendMessage = async (req, res) => {
       chatRequestId: chatRequest._id,
       senderId: req.userId,
       text: text ? text.trim() : undefined,
-      attachmentUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
+      attachmentUrl: req.file ? req.file.cloudinaryUrl : undefined,
       attachmentType: req.file ? req.file.mimetype : undefined,
     });
 

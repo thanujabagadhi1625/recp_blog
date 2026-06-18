@@ -53,7 +53,7 @@ const addComment = async (req, res) => {
       parentId: parentId || null,
       author: authorName,
       text: text.trim(),
-      attachmentUrl: req.file ? `/uploads/${req.file.filename}` : undefined,
+      attachmentUrl: req.file ? req.file.cloudinaryUrl : undefined,
       attachmentType: req.file ? req.file.mimetype : undefined,
     });
 

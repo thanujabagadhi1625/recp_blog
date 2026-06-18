@@ -98,7 +98,7 @@ const addRecipe = async (req, res) => {
     }
 
     try {
-        const coverImage = `/uploads/${req.file.filename}`;
+        const coverImage = req.file.cloudinaryUrl;
         const parsedTags = parseTags(tags);
         const newRecipe = new Recipe({
             title,
@@ -144,7 +144,7 @@ const editRecipe = async (req, res) => {
 
         const updateFields = { ...req.body };
         if (req.file) {
-            updateFields.coverImage = `/uploads/${req.file.filename}`;
+            updateFields.coverImage = req.file.cloudinaryUrl;
         }
         if (req.body.tags) {
             updateFields.tags = parseTags(req.body.tags);

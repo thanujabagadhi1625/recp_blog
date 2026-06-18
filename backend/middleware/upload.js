@@ -1,13 +1,16 @@
 const multer = require('multer');
 const path = require('path');
+const cloudinary = require('cloudinary').v2;
 
-const storage = multer.diskStorage({
-  destination: './uploads/',
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
-  },
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// Use memory storage for multer (files stored in memory before uploading to Cloudinary)
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
@@ -29,4 +32,30 @@ function checkFileType(file, cb) {
   cb(new Error('Unsupported file type. Use image or video files only.'));
 }
 
-module.exports = upload;
+// Middleware to upload file to Cloudinary
+const uploadToCloudinary = (req, res, next) => {
+  if (!req.file) {
+    return next();
+  }
+
+  const fileType = req.file.mimetype.startsWith('image') ? 'image' : 'video';
+  
+  const uploadStream = cloudinary.uploader.upload_stream(
+    {
+      resource_type: fileType,
+      folder: 'recp-app',
+    },
+    (error, result) => {
+      if (error) {
+        return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+      }
+      req.file.cloudinaryUrl = result.secure_url;
+      req.file.cloudinaryPublicId = result.public_id;
+      next();
+    }
+  );
+
+  uploadStream.end(req.file.buffer);
+};
+
+module.exports = { upload, uploadToCloudinary };
