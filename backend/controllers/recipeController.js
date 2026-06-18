@@ -188,9 +188,13 @@ const likeRecipe = async (req, res) => {
         // Toggle like status and clear dislike when liking
         if (recipe.likes.includes(req.userId)) {
             recipe.likes = recipe.likes.filter(id => id.toString() !== req.userId);
+            // if user unliked, also remove from their favorites
+            await User.findByIdAndUpdate(req.userId, { $pull: { favorites: recipe._id } });
         } else {
             recipe.likes.push(req.userId);
             recipe.dislikes = recipe.dislikes.filter(id => id.toString() !== req.userId);
+            // when liking, also add to favorites
+            await User.findByIdAndUpdate(req.userId, { $addToSet: { favorites: recipe._id } });
         }
 
         await recipe.save();

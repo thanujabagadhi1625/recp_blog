@@ -101,10 +101,48 @@ const sendMessage = async (req, res) => {
       attachmentType: req.file ? req.file.mimetype : undefined,
     });
 
-    return res.status(201).json(message);
+    // populate sender info for response
+    const savedMessage = await ChatMessage.findById(message._id).populate('senderId', 'name avatar email');
+
+    // Emit real-time message to room (room name = chatRequest id)
+    const io = req.app.locals.io;
+    if (io) {
+      io.to(chatRequest._id.toString()).emit('new_message', savedMessage);
+    }
+
+    return res.status(201).json(savedMessage);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Server error sending message' });
+  }
+};
+
+const getChatRooms = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const rooms = await ChatRequest.find({
+      status: 'accepted',
+      $or: [{ senderId: userId }, { receiverId: userId }]
+    }).populate('senderId receiverId', 'name avatar email');
+
+    const mapped = rooms.map(r => {
+      const other = r.senderId._id.toString() === userId ? r.receiverId : r.senderId;
+      return {
+        chatRequestId: r._id,
+        otherUser: {
+          id: other._id,
+          name: other.name,
+          avatar: other.avatar,
+          email: other.email,
+        },
+        createdAt: r.createdAt
+      };
+    });
+
+    return res.status(200).json(mapped);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Server error fetching chat rooms' });
   }
 };
 
@@ -114,4 +152,5 @@ module.exports = {
   getChatRequests,
   getMessages,
   sendMessage,
+  getChatRooms,
 };

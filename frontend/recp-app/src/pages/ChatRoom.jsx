@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { io } from 'socket.io-client';
 
 const ChatRoom = () => {
   const { requestId } = useParams();
@@ -28,6 +29,22 @@ const ChatRoom = () => {
     };
 
     fetchChat();
+  }, [requestId]);
+
+  // Socket.IO real-time updates
+  const socketRef = useRef();
+  useEffect(() => {
+    socketRef.current = io('http://localhost:4444');
+    socketRef.current.emit('join', requestId);
+    socketRef.current.on('new_message', (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.emit('leave', requestId);
+        socketRef.current.disconnect();
+      }
+    };
   }, [requestId]);
 
   const handleFileChange = (e) => {
@@ -92,10 +109,18 @@ const ChatRoom = () => {
                 <div style={{ maxWidth: '70%', background: message.senderId === user.id ? '#d2f8d2' : '#f4f4f4', padding: '12px 16px', borderRadius: '14px' }}>
                   {message.text && <p style={{ margin: 0 }}>{message.text}</p>}
                   {message.attachmentUrl && (
-                    message.attachmentType?.startsWith('image/') ? (
-                      <img src={`http://localhost:4444${message.attachmentUrl}`} alt="attachment" style={{ width: '100%', marginTop: '10px', borderRadius: '12px' }} />
+                    (message.attachmentUrl.startsWith('http') || message.attachmentUrl.startsWith('data:')) ? (
+                      message.attachmentType?.startsWith('image/') ? (
+                        <img src={message.attachmentUrl} alt="attachment" style={{ width: '100%', marginTop: '10px', borderRadius: '12px' }} />
+                      ) : (
+                        <video controls src={message.attachmentUrl} style={{ width: '100%', marginTop: '10px', borderRadius: '12px' }} />
+                      )
                     ) : (
-                      <video controls src={`http://localhost:4444${message.attachmentUrl}`} style={{ width: '100%', marginTop: '10px', borderRadius: '12px' }} />
+                      message.attachmentType?.startsWith('image/') ? (
+                        <img src={`http://localhost:4444${message.attachmentUrl}`} alt="attachment" style={{ width: '100%', marginTop: '10px', borderRadius: '12px' }} />
+                      ) : (
+                        <video controls src={`http://localhost:4444${message.attachmentUrl}`} style={{ width: '100%', marginTop: '10px', borderRadius: '12px' }} />
+                      )
                     )
                   )}
                   <small style={{ display: 'block', marginTop: '8px', color: '#555' }}>{new Date(message.createdAt).toLocaleString()}</small>

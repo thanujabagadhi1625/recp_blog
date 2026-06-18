@@ -8,10 +8,12 @@ const {
   getChatRequests,
   getMessages,
   sendMessage,
+  getChatRooms,
 } = require('../controllers/chatController');
 
 router.post('/request/:receiverId', authMiddleware, sendChatRequest);
 router.get('/requests', authMiddleware, getChatRequests);
+router.get('/rooms', authMiddleware, getChatRooms);
 router.post('/request/:requestId/respond', authMiddleware, respondToChatRequest);
 router.get('/:requestId/messages', authMiddleware, getMessages);
 router.post('/:requestId/messages', authMiddleware, upload.single('attachment'), uploadToCloudinary, sendMessage);

@@ -20,6 +20,7 @@ import Profile from "./pages/Profile";
 import UserSearch from "./pages/UserSearch";
 import ChatRequests from "./pages/ChatRequests";
 import ChatRoom from "./pages/ChatRoom";
+import ChatRooms from "./pages/ChatRooms";
 
 // Main router configuration
 const router = createBrowserRouter([
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
       { path: "/edit-recipe/:id", element: <EditRecipe /> }, // Route for the new edit page
       { path: "/profile", element: <Profile /> },
       { path: "/users", element: <UserSearch /> },
+      { path: "/chat", element: <ChatRooms /> },
       { path: "/chat/requests", element: <ChatRequests /> },
       { path: "/chat/:requestId", element: <ChatRoom /> },
     ],
