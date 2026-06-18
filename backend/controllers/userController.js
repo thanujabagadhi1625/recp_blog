@@ -14,11 +14,13 @@ const getFullImageUrl = (req, imagePath) => {
 
 const userSignup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
     
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email and password required' });
     }
+
+    email = String(email).trim().toLowerCase();
 
     const existing = await User.findOne({ email });
     if (existing) return res.status(409).json({ message: 'User already exists' });
@@ -45,13 +47,20 @@ const userSignup = async (req, res) => {
 
 const userLogin = async (req, res) => {
   try {
-    const { email, password } = req.body; // 'email' may contain username or email
+    let { email, password } = req.body; // 'email' may contain username or email
     if (!email || !password) return res.status(400).json({ message: 'Identifier and password required' });
+
+    email = String(email).trim();
 
     // Allow login by email or by username (name)
     let user;
-    if (String(email).includes('@')) {
-      user = await User.findOne({ email });
+    if (email.includes('@')) {
+      // case-insensitive email lookup
+      user = await User.findOne({ email: email.toLowerCase() });
+      if (!user) {
+        // fallback to case-insensitive search in DB
+        user = await User.findOne({ email: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') });
+      }
     } else {
       user = await User.findOne({ name: email });
     }
