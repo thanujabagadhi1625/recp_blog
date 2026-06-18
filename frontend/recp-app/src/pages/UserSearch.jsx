@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 const UserSearch = () => {
+  const { token } = useContext(AuthContext);
   const [query, setQuery] = useState('');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -50,7 +52,7 @@ const UserSearch = () => {
                   <button
                     onClick={async () => {
                       try {
-                        await axios.post(`http://localhost:4444/api/chats/request/${user._id}`);
+                        await axios.post(`http://localhost:4444/api/chats/request/${user._id}`, {}, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
                         alert('Chat request sent');
                       } catch (err) {
                         console.error('Failed to send chat request', err);

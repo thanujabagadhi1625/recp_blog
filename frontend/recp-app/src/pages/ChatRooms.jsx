@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const ChatRooms = () => {
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,7 +16,7 @@ const ChatRooms = () => {
       }
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:4444/api/chats/rooms');
+        const res = await axios.get('http://localhost:4444/api/chats/rooms', { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
         setRooms(res.data);
       } catch (err) {
         console.error('Failed to load chat rooms', err);
@@ -26,7 +26,7 @@ const ChatRooms = () => {
     };
 
     fetchRooms();
-  }, [user]);
+  }, [user, token]);
 
   if (!user) return <h2 style={{ textAlign: 'center', marginTop: '80px' }}>Please log in to view chat rooms.</h2>;
   if (loading) return <h2 style={{ textAlign: 'center', marginTop: '80px' }}>Loading chat rooms...</h2>;

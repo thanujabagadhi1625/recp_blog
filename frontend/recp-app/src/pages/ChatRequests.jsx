@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 const ChatRequests = () => {
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,7 +16,7 @@ const ChatRequests = () => {
     const fetchRequests = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:4444/api/chats/requests');
+        const res = await axios.get('http://localhost:4444/api/chats/requests', { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
         setRequests(res.data);
       } catch (err) {
         console.error('Failed to load chat requests', err);
@@ -53,7 +53,7 @@ const ChatRequests = () => {
                 <button
                   onClick={async () => {
                     try {
-                      await axios.post(`http://localhost:4444/api/chats/request/${request._id}/respond`, { action: 'accepted' });
+                      await axios.post(`http://localhost:4444/api/chats/request/${request._id}/respond`, { action: 'accepted' }, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
                       window.location.href = `/chat/${request._id}`;
                     } catch (err) {
                       console.error('Failed to accept', err);
@@ -65,7 +65,7 @@ const ChatRequests = () => {
                 <button
                   onClick={async () => {
                     try {
-                      await axios.post(`http://localhost:4444/api/chats/request/${request._id}/respond`, { action: 'declined' });
+                      await axios.post(`http://localhost:4444/api/chats/request/${request._id}/respond`, { action: 'declined' }, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
                       setRequests((prev) => prev.filter(r => r._id !== request._id));
                     } catch (err) {
                       console.error('Failed to decline', err);
