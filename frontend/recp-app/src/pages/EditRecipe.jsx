@@ -18,6 +18,9 @@ const EditRecipe = () => {
         servings: 1,
         tags: '',
     });
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState('');
+    const [currentImage, setCurrentImage] = useState('');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -35,6 +38,7 @@ const EditRecipe = () => {
                     servings: recipe.servings,
                     tags: recipe.tags.join(', '),
                 });
+                setCurrentImage(recipe.coverImage || '');
             } catch (error) {
                 console.error("Failed to fetch recipe for editing", error);
                 alert("Could not load recipe data.");
@@ -51,6 +55,12 @@ const EditRecipe = () => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        setSelectedFile(file);
+        setPreviewUrl(file ? URL.createObjectURL(file) : '');
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -64,7 +74,19 @@ const EditRecipe = () => {
                 servings: Number(formData.servings),
             };
 
-            await axios.put(`http://localhost:4444/api/recipes/${id}`, payload);
+            const bodyFormData = new FormData();
+            Object.entries(payload).forEach(([key, value]) => {
+                if (Array.isArray(value)) {
+                    value.forEach(item => bodyFormData.append(key, item));
+                } else {
+                    bodyFormData.append(key, value);
+                }
+            });
+            if (selectedFile) {
+                bodyFormData.append('coverImage', selectedFile);
+            }
+
+            await axios.put(`http://localhost:4444/api/recipes/${id}`, bodyFormData);
             alert("Recipe updated successfully! ✅");
             navigate(`/recipe/${id}`);
         } catch (err) {
@@ -118,6 +140,20 @@ const EditRecipe = () => {
                     </div>
                 </div>
 
+                <div className="form-group">
+                    <label htmlFor="coverImage">Recipe Photo (optional)</label>
+                    <input type="file" id="coverImage" name="coverImage" onChange={handleFileChange} accept="image/*" />
+                </div>
+                {(previewUrl || currentImage) && (
+                    <div className="form-group">
+                        <p>Current photo preview:</p>
+                        <img
+                            src={previewUrl || currentImage}
+                            alt="Recipe preview"
+                            style={{ width: '100%', maxWidth: '400px', borderRadius: '12px' }}
+                        />
+                    </div>
+                )}
                 <div className="form-group">
                     <label htmlFor="tags">Tags (e.g., Italian, Dinner, Quick)</label>
                     <input type="text" id="tags" name="tags" value={formData.tags} onChange={handleChange} placeholder="Separate with commas" />

@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 function Inputform({ setIsOpen }) {
   const [name, setName] = useState("");
@@ -8,6 +9,7 @@ function Inputform({ setIsOpen }) {
   const [password, setPassword] = useState("");
   const [isSignup, setIsSignup] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
@@ -42,23 +44,27 @@ function Inputform({ setIsOpen }) {
       )}
 
       <div className="form-control">
-        <label>Email</label>
+        <label>{isSignup ? 'Email' : 'Email or Username'}</label>
         <input
-          type="email"
+          type="text"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
       </div>
 
-      <div className="form-control">
+      <div className="form-control" style={{ position: 'relative' }}>
         <label>Password</label>
         <input
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          style={{ paddingRight: '40px' }}
         />
+        <span onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '10px', top: '38px', cursor: 'pointer' }}>
+          {showPassword ? <FaEyeSlash /> : <FaEye />}
+        </span>
       </div>
 
       <button type="submit">{isSignup ? "Sign Up" : "Login"}</button>

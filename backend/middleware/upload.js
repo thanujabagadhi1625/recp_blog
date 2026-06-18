@@ -1,35 +1,32 @@
-// backend/middleware/upload.js
 const multer = require('multer');
 const path = require('path');
 
-// Set up storage engine
 const storage = multer.diskStorage({
-    destination: './uploads/',
-    filename: function(req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
+  destination: './uploads/',
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+  },
 });
 
-// Init upload variable
 const upload = multer({
-    storage: storage,
-    limits: { fileSize: 2000000 }, // Limit file size to 2MB
-    fileFilter: function(req, file, cb) {
-        checkFileType(file, cb);
-    }
-}).single('coverImage'); // 'coverImage' must match the name attribute in the form
+  storage,
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: function (req, file, cb) {
+    checkFileType(file, cb);
+  },
+});
 
-// Check file type
 function checkFileType(file, cb) {
-    const filetypes = /jpeg|jpg|png|gif/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
+  const allowed = /jpeg|jpg|png|gif|mp4|mov|webm|mkv/;
+  const extname = allowed.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowed.test(file.mimetype);
 
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb('Error: Images Only!');
-    }
+  if (mimetype && extname) {
+    return cb(null, true);
+  }
+
+  cb(new Error('Unsupported file type. Use image or video files only.'));
 }
 
 module.exports = upload;

@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     avatar: { type: String, default: 'https://via.placeholder.com/150' },
     bio: { type: String, maxlength: 200 },
+    favoriteCuisines: [{ type: String }],
+    hobbies: [{ type: String }],
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Recipe' }],
   },
   { timestamps: true }

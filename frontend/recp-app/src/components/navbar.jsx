@@ -28,6 +28,8 @@ function Navbar() {
             <>
               <li><Link to="/favorites">Favorites</Link></li>
               <li><Link to="/my-recipes">My Recipes</Link></li>
+              <li><Link to="/users">Find Users</Link></li>
+              <li><Link to="/chat/requests">Chat Requests</Link></li>
               <li><Link to="/add-recipe">Add Recipe</Link></li>
             </>
           )}

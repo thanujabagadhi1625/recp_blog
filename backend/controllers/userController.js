@@ -4,6 +4,13 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_change_me';
+ 
+const getFullImageUrl = (req, imagePath) => {
+  if (!imagePath) return imagePath;
+  if (imagePath.startsWith('http')) return imagePath;
+  const host = req.get('host');
+  return `${req.protocol}://${host}${imagePath}`;
+};
 
 const userSignup = async (req, res) => {
   try {
@@ -19,7 +26,7 @@ const userSignup = async (req, res) => {
     const hashpass = await bcrypt.hash(password, 10);
     const newUser = await User.create({ name, email, password: hashpass });
 
-    const token = jwt.sign({ email: newUser.email, id: newUser._id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ email: newUser.email, id: newUser._id, name: newUser.name }, JWT_SECRET, { expiresIn: '7d' });
     
     return res.status(201).json({ 
       token, 
@@ -38,16 +45,23 @@ const userSignup = async (req, res) => {
 
 const userLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
+    const { email, password } = req.body; // 'email' may contain username or email
+    if (!email || !password) return res.status(400).json({ message: 'Identifier and password required' });
 
-    const user = await User.findOne({ email });
+    // Allow login by email or by username (name)
+    let user;
+    if (String(email).includes('@')) {
+      user = await User.findOne({ email });
+    } else {
+      user = await User.findOne({ name: email });
+    }
+
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ email: user.email, id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ email: user.email, id: user._id, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
     
     return res.status(200).json({ 
       token, 
@@ -69,7 +83,12 @@ const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password').populate('favorites');
     if (!user) return res.status(404).json({ message: 'User not found' });
-    return res.status(200).json(user);
+    const profile = user.toObject();
+    profile.favorites = profile.favorites.map((recipe) => ({
+      ...recipe,
+      coverImage: getFullImageUrl(req, recipe.coverImage),
+    }));
+    return res.status(200).json(profile);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Server error' });
@@ -114,12 +133,76 @@ const getFavorites = async (req, res) => {
   try {
     const user = await User.findById(req.userId).populate('favorites');
     if (!user) return res.status(404).json({ message: 'User not found' });
-    
-    return res.status(200).json(user.favorites);
+    const mapped = user.favorites.map((recipe) => ({
+      ...recipe.toObject(),
+      coverImage: getFullImageUrl(req, recipe.coverImage),
+    }));
+    return res.status(200).json(mapped);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+ 
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select('-password').populate('favorites');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const result = user.toObject();
+    result.favorites = result.favorites.map((recipe) => ({
+      ...recipe.toObject(),
+      coverImage: getFullImageUrl(req, recipe.coverImage),
+    }));
+    return res.status(200).json(result);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Server error' });
   }
 };
 
-module.exports = { userSignup, userLogin, getUser, addFavorite, removeFavorite, getFavorites };
+const updateProfile = async (req, res) => {
+  try {
+    const { avatar, bio, favoriteCuisines, hobbies } = req.body;
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (avatar) user.avatar = avatar;
+    if (bio !== undefined) user.bio = bio;
+    if (favoriteCuisines !== undefined) {
+      user.favoriteCuisines = Array.isArray(favoriteCuisines)
+        ? favoriteCuisines
+        : String(favoriteCuisines).split(',').map((item) => item.trim()).filter(Boolean);
+    }
+    if (hobbies !== undefined) {
+      user.hobbies = Array.isArray(hobbies)
+        ? hobbies
+        : String(hobbies).split(',').map((item) => item.trim()).filter(Boolean);
+    }
+
+    await user.save();
+    const profile = user.toObject();
+    delete profile.password;
+    return res.status(200).json(profile);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const searchUsers = async (req, res) => {
+  try {
+    const query = req.query.q || '';
+    const users = await User.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { email: { $regex: query, $options: 'i' } },
+      ],
+    }).select('name email avatar bio favoriteCuisines hobbies');
+    return res.status(200).json(users);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
+module.exports = { userSignup, userLogin, getUser, addFavorite, removeFavorite, getFavorites, getMe, updateProfile, searchUsers };

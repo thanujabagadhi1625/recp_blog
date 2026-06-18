@@ -16,6 +16,10 @@ import Favorites from "./pages/Favorites";
 import RecipeDetail from "./pages/RecipeDetail";
 import EditRecipe from "./pages/EditRecipe"; // I've created this new component for you
 import NotFound from "./pages/NotFound"; // A good practice to have a 404 page
+import Profile from "./pages/Profile";
+import UserSearch from "./pages/UserSearch";
+import ChatRequests from "./pages/ChatRequests";
+import ChatRoom from "./pages/ChatRoom";
 
 // Main router configuration
 const router = createBrowserRouter([
@@ -43,6 +47,10 @@ const router = createBrowserRouter([
       { path: "/add-recipe", element: <AddRecipe /> },
       { path: "/recipe/:id", element: <RecipeDetail /> },
       { path: "/edit-recipe/:id", element: <EditRecipe /> }, // Route for the new edit page
+      { path: "/profile", element: <Profile /> },
+      { path: "/users", element: <UserSearch /> },
+      { path: "/chat/requests", element: <ChatRequests /> },
+      { path: "/chat/:requestId", element: <ChatRoom /> },
     ],
   },
 ]);

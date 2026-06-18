@@ -28,6 +28,7 @@ const recipeSchema = new mongoose.Schema(
     author: { type: String, required: true },
     
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     viewCount: { type: Number, default: 0 },
   },
   { timestamps: true }

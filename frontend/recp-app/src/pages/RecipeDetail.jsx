@@ -9,6 +9,11 @@ const RecipeDetail = () => {
     const [recipe, setRecipe] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState("");
+    const [replyTo, setReplyTo] = useState(null);
+    const [replyText, setReplyText] = useState("");
+    const [commentLoading, setCommentLoading] = useState(false);
     const { id } = useParams();
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -27,7 +32,18 @@ const RecipeDetail = () => {
                 setLoading(false);
             }
         };
+
+        const fetchComments = async () => {
+            try {
+                const res = await axios.get(`http://localhost:4444/api/comments/recipe/${id}`);
+                setComments(res.data);
+            } catch (err) {
+                console.error('Failed to load comments', err);
+            }
+        };
+
         fetchRecipe();
+        fetchComments();
     }, [id]);
 
     const handleDelete = async () => {
@@ -44,6 +60,79 @@ const RecipeDetail = () => {
 
     const handleEdit = () => {
         navigate(`/edit-recipe/${id}`);
+    };
+
+    const handleLikeRecipe = async () => {
+        if (!user) {
+            alert('Please log in to like recipes.');
+            return;
+        }
+
+        try {
+            await axios.post(`http://localhost:4444/api/recipes/${id}/like`);
+            const res = await axios.get(`http://localhost:4444/api/recipes/${id}`);
+            setRecipe(res.data);
+        } catch (err) {
+            console.error('Failed to like recipe', err);
+        }
+    };
+
+    const handleDislikeRecipe = async () => {
+        if (!user) {
+            alert('Please log in to dislike recipes.');
+            return;
+        }
+
+        try {
+            await axios.post(`http://localhost:4444/api/recipes/${id}/dislike`);
+            const res = await axios.get(`http://localhost:4444/api/recipes/${id}`);
+            setRecipe(res.data);
+        } catch (err) {
+            console.error('Failed to dislike recipe', err);
+        }
+    };
+
+    const handleFavorite = async () => {
+        if (!user) {
+            alert('Please log in to add favorites.');
+            return;
+        }
+        try {
+            await axios.post(`http://localhost:4444/api/users/favorites/${recipe._id}`);
+            alert('Added to favorites');
+        } catch (err) {
+            console.error('Failed to add favorite', err);
+            alert(err.response?.data?.message || 'Unable to add favorite');
+        }
+    };
+
+    const handleCommentSubmit = async (e) => {
+        e.preventDefault();
+        if (!user) {
+            alert('Please log in to post a comment.');
+            return;
+        }
+        if (!newComment.trim() && !replyText.trim()) {
+            return;
+        }
+        setCommentLoading(true);
+
+        try {
+            const payload = {
+                text: replyTo ? replyText.trim() : newComment.trim(),
+                parentId: replyTo || undefined,
+            };
+            await axios.post(`http://localhost:4444/api/comments/recipe/${id}`, payload);
+            setNewComment('');
+            setReplyTo(null);
+            setReplyText('');
+            const res = await axios.get(`http://localhost:4444/api/comments/recipe/${id}`);
+            setComments(res.data);
+        } catch (err) {
+            console.error('Failed to submit comment', err);
+        } finally {
+            setCommentLoading(false);
+        }
     };
 
     if (loading) return <h2 style={{ textAlign: "center", marginTop: "80px" }}>Loading Recipe...</h2>;
@@ -69,13 +158,27 @@ const RecipeDetail = () => {
                 <div className="stat-item"><FaClock /> {recipe.cookTime} min (Cook)</div>
                 <div className="stat-item"><FaUserFriends /> Serves {recipe.servings}</div>
                 {recipe.cuisine && <div className="stat-item"><FaGlobe /> {recipe.cuisine}</div>}
-                <div className="stat-item"><FaHeart style={{ color: "red" }} /> {recipe.likes?.length || 0}</div>
+                <div className="stat-item" onClick={handleLikeRecipe} style={{ cursor: 'pointer' }}>
+                    <FaHeart style={{ color: recipe.likes?.includes(user?.id) ? 'red' : '#888' }} /> {recipe.likes?.length || 0}
+                </div>
+                <div className="stat-item" onClick={handleDislikeRecipe} style={{ cursor: 'pointer' }}>
+                    <FaHeart style={{ transform: 'rotate(180deg)', color: recipe.dislikes?.includes(user?.id) ? 'blue' : '#888' }} /> {recipe.dislikes?.length || 0}
+                </div>
             </div>
 
             {isAuthor && (
                 <div className="author-controls">
                     <button onClick={handleEdit} className="edit-btn"><FaEdit /> Edit</button>
                     <button onClick={handleDelete} className="delete-btn"><FaTrash /> Delete</button>
+                </div>
+            )}
+            {user && (
+                <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+                    <button onClick={handleFavorite} className="favorite-btn">Add to Favorites</button>
+                    <button onClick={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert('Recipe link copied to clipboard!');
+                    }} className="share-btn">Share Recipe</button>
                 </div>
             )}
 
@@ -92,6 +195,69 @@ const RecipeDetail = () => {
                     </section>
                 </div>
             </main>
+
+            <section className="comments-section">
+                <div className="comments-header">
+                    <h2>Comments</h2>
+                    <p>{comments.length} comment{comments.length === 1 ? '' : 's'}</p>
+                </div>
+                <form onSubmit={handleCommentSubmit} className="comment-form">
+                    <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Share a quick tip or ask a question..."
+                        rows={3}
+                    />
+                    <button type="submit" disabled={commentLoading}>
+                        {commentLoading ? 'Posting...' : 'Post Comment'}
+                    </button>
+                </form>
+                <div className="comment-list">
+                    {comments.map((comment) => (
+                        <div key={comment._id} className="comment-card">
+                            <div className="comment-author">
+                                <strong>{comment.author}</strong>
+                                <span>{new Date(comment.createdAt).toLocaleString()}</span>
+                            </div>
+                            <p>{comment.text}</p>
+                            <button
+                                type="button"
+                                onClick={() => setReplyTo(replyTo === comment._id ? null : comment._id)}
+                                style={{ marginTop: '8px', padding: '6px 10px', cursor: 'pointer' }}
+                            >
+                                {replyTo === comment._id ? 'Cancel Reply' : 'Reply'}
+                            </button>
+                            {replyTo === comment._id && (
+                                <div style={{ marginTop: '12px' }}>
+                                    <textarea
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                        placeholder="Write your reply..."
+                                        rows={3}
+                                        style={{ width: '100%', marginBottom: '8px' }}
+                                    />
+                                    <button type="button" onClick={handleCommentSubmit} disabled={commentLoading}>
+                                        {commentLoading ? 'Posting...' : 'Post Reply'}
+                                    </button>
+                                </div>
+                            )}
+                            {comment.children?.length > 0 && (
+                                <div style={{ marginLeft: '20px', marginTop: '12px' }}>
+                                    {comment.children.map((reply) => (
+                                        <div key={reply._id} className="comment-card" style={{ background: '#f8f8f8', marginTop: '10px' }}>
+                                            <div className="comment-author">
+                                                <strong>{reply.author}</strong>
+                                                <span>{new Date(reply.createdAt).toLocaleString()}</span>
+                                            </div>
+                                            <p>{reply.text}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </section>
         </div>
     );
 };

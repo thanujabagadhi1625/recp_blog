@@ -17,12 +17,19 @@ const AddRecipe = () => {
         servings: 2,
         tags: '',
     });
-
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
     const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        setSelectedFile(file);
+        setPreviewUrl(file ? URL.createObjectURL(file) : null);
     };
 
     const handleSubmit = async (e) => {
@@ -31,19 +38,36 @@ const AddRecipe = () => {
             alert("Please log in to add a recipe.");
             return;
         }
+        if (!selectedFile) {
+            alert('Please upload a photo for your recipe.');
+            return;
+        }
         setLoading(true);
         try {
             const payload = {
                 ...formData,
-                author: user.name || 'Unknown Author', 
-                userId: user.id || user._id, 
+                author: user.name || 'Unknown Author',
+                userId: user.id || user._id,
                 tags: formData.tags.split(',').map(t => t.trim()).filter(t => t),
             };
-            await axios.post("http://localhost:4444/api/recipes", payload);
+
+            const bodyFormData = new FormData();
+            bodyFormData.append('coverImage', selectedFile);
+            Object.entries(payload).forEach(([key, value]) => {
+                if (Array.isArray(value)) {
+                    value.forEach(item => bodyFormData.append(key, item));
+                } else {
+                    bodyFormData.append(key, value);
+                }
+            });
+
+            await axios.post("http://localhost:4444/api/recipes", bodyFormData);
             alert("Recipe added! Yum! 🎉");
-            navigate("/my-recipes"); 
+            navigate("/my-recipes");
         } catch (err) {
-            alert(`Oops! Something went wrong.`);
+            console.error('Add recipe failed:', err.response?.data || err.message || err);
+            const message = err.response?.data?.message || err.response?.data?.error || err.message || 'Oops! Something went wrong.';
+            alert(`Error: ${message}`);
         } finally {
             setLoading(false);
         }
@@ -85,6 +109,16 @@ const AddRecipe = () => {
                     </div>
                 </div>
 
+                <div className="form-group">
+                    <label htmlFor="coverImage">Recipe Photo 📷</label>
+                    <input type="file" id="coverImage" name="coverImage" onChange={handleFileChange} accept="image/*" required />
+                </div>
+                {previewUrl && (
+                    <div className="form-group">
+                        <p>Photo preview:</p>
+                        <img src={previewUrl} alt="Preview" style={{ width: '100%', maxWidth: '400px', borderRadius: '12px' }} />
+                    </div>
+                )}
                 <div className="form-group">
                     <label htmlFor="tags">Tags (e.g., spicy, vegan) 🏷️</label>
                     <input type="text" id="tags" name="tags" value={formData.tags} onChange={handleChange} placeholder="Separate with commas" />

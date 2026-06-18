@@ -7,11 +7,17 @@ const {
   getUser, 
   addFavorite, 
   removeFavorite, 
-  getFavorites 
+  getFavorites,
+  getMe,
+  updateProfile,
+  searchUsers
 } = require('../controllers/userController');
 
 router.post('/signup', userSignup);
 router.post('/login', userLogin);
+router.get('/search', authMiddleware, searchUsers);
+router.get('/me', authMiddleware, getMe);
+router.put('/me', authMiddleware, updateProfile);
 router.get('/:id', getUser);
 
 router.post('/favorites/:recipeId', authMiddleware, addFavorite);
