@@ -38,15 +38,19 @@ const ChatRooms = () => {
         <p>No active chats yet. Accept chat requests to start chatting.</p>
       ) : (
         <div style={{ display: 'grid', gap: '12px' }}>
-          {rooms.map(r => (
-            <Link key={r.chatRequestId} to={`/chat/${r.chatRequestId}`} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px', border: '1px solid #ddd', borderRadius: '10px', textDecoration: 'none', color: 'inherit' }}>
-              <img src={r.otherUser.avatar || 'https://via.placeholder.com/80'} alt={r.otherUser.name} style={{ width: '64px', height: '64px', borderRadius: '12px' }} />
-              <div>
-                <h3 style={{ margin: 0 }}>{r.otherUser.name}</h3>
-                <p style={{ margin: 0, color: '#666' }}>{r.otherUser.email && (r.otherUser.email.includes('@') ? `${r.otherUser.email.replace(/(.{2}).+(@.+)/,'$1***$2')}` : r.otherUser.email) : ''}</p>
-              </div>
-            </Link>
-          ))}
+          {rooms.map(r => {
+            const email = r?.otherUser?.email || '';
+            const displayEmail = email && email.includes('@') ? email.replace(/(.{2}).+(@.+)/, '$1***$2') : email;
+            return (
+              <Link key={r.chatRequestId} to={`/chat/${r.chatRequestId}`} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px', border: '1px solid #ddd', borderRadius: '10px', textDecoration: 'none', color: 'inherit' }}>
+                <img src={r.otherUser?.avatar || 'https://via.placeholder.com/80'} alt={r.otherUser?.name || 'User'} style={{ width: '64px', height: '64px', borderRadius: '12px' }} />
+                <div>
+                  <h3 style={{ margin: 0 }}>{r.otherUser?.name || 'Unknown'}</h3>
+                  <p style={{ margin: 0, color: '#666' }}>{displayEmail}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

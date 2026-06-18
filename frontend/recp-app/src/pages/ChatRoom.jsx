@@ -6,7 +6,7 @@ import { io } from 'socket.io-client';
 
 const ChatRoom = () => {
   const { requestId } = useParams();
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [file, setFile] = useState(null);
@@ -18,7 +18,7 @@ const ChatRoom = () => {
     const fetchChat = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:4444/api/chats/${requestId}/messages`);
+        const res = await axios.get(`http://localhost:4444/api/chats/${requestId}/messages`, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
         setMessages(res.data);
         setChatRequest(res.data.length ? res.data[0] : null);
       } catch (err) {
@@ -66,11 +66,11 @@ const ChatRoom = () => {
       if (text.trim()) body.append('text', text.trim());
       if (file) body.append('attachment', file);
       await axios.post(`http://localhost:4444/api/chats/${requestId}/messages`, body, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': 'multipart/form-data', Authorization: token ? `Bearer ${token}` : undefined },
       });
       setText('');
       setFile(null);
-      const res = await axios.get(`http://localhost:4444/api/chats/${requestId}/messages`);
+      const res = await axios.get(`http://localhost:4444/api/chats/${requestId}/messages`, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
       setMessages(res.data);
     } catch (err) {
       console.error('Failed to send message', err);
@@ -81,7 +81,7 @@ const ChatRoom = () => {
 
   const respondToRequest = async (action) => {
     try {
-      await axios.post(`http://localhost:4444/api/chats/request/${requestId}/respond`, { action });
+      await axios.post(`http://localhost:4444/api/chats/request/${requestId}/respond`, { action }, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
       alert(`Chat request ${action}`);
     } catch (err) {
       console.error('Failed to respond to request', err);

@@ -76,6 +76,22 @@ const AddRecipe = () => {
     return (
         <div className="form-container">
             <h2>Share Your Masterpiece! 🍳</h2>
+            <div
+                role="alert"
+                aria-live="polite"
+                style={{
+                    background: '#fff4e5',
+                    border: '1px solid #ffd1a3',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                    color: '#663c00',
+                }}
+            >
+                <strong>Warning:</strong> Do not post personal photos or images
+                with identifiable people. Only upload food photos you own or
+                have permission to share.
+            </div>
             <form onSubmit={handleSubmit} className="form">
                 <div className="form-group">
                     <label htmlFor="title">Recipe Title 📝</label>
@@ -111,7 +127,11 @@ const AddRecipe = () => {
 
                 <div className="form-group">
                     <label htmlFor="coverImage">Recipe Photo 📷</label>
-                    <input type="file" id="coverImage" name="coverImage" onChange={handleFileChange} accept="image/*" required />
+                    <input type="file" id="coverImage" name="coverImage" onChange={handleFileChange} accept="image/*" />
+                    <p style={{ color: '#a33', fontSize: '0.9rem', marginTop: '6px' }}>
+                        Please do not upload personal photos or images that show
+                        identifiable people.
+                    </p>
                 </div>
                 {previewUrl && (
                     <div className="form-group">
