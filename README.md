@@ -1,36 +1,65 @@
-# 🍜 Recp - A Full-Stack MERN Recipe Application
+# �️ FoodieVerse - Full-Stack Recipe Sharing Platform
 
-This is a complete MERN stack (MongoDB, Express.js, React, Node.js) web application that allows users to publish, discover, and save their favorite recipes. It features a secure RESTful API with user authentication and a dynamic, user-friendly frontend.
+FoodieVerse is a full-stack MERN application where users can discover, share, and interact with recipes in a modern and responsive web experience. The platform supports recipe publishing, user profiles, favorites, comments, likes/dislikes, and real-time chat requests between users.
 
 ## ✨ Key Features
 
-- **Full User Authentication:** Secure user registration and login using JWT and bcrypt for password hashing.
-- **Complete Recipe Management:** Users have full CRUD (Create, Read, Update, Delete) control over their own recipes.
-- **Optional Image Uploads:** Users can optionally upload a cover image for their recipes using Multer for file handling.
-- **Interactive UI:** Users can "like" recipes and add/remove recipes from their personal "favorites" list.
-- **Dynamic Search & Filtering:** The homepage allows for real-time searching of all public recipes.
+- **Secure Authentication:** User signup/login with JWT and bcrypt-based password hashing.
+- **Recipe Management:** Users can create, view, edit, delete, and manage their own recipes.
+- **Interactive Engagement:** Recipes support likes, dislikes, comments, and favorites.
+- **User Profiles:** Users can update their profile, bio, favorite cuisines, and hobbies.
+- **Search and Filtering:** Browse recipes with search and category-based filtering.
+- **Image Uploads:** Recipe cover images and chat attachments are supported.
+- **Real-Time Chat:** Users can send chat requests and communicate through real-time messaging with Socket.IO.
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
-- **Frontend:** React, React Router, Axios
+- **Frontend:** React, React Router, Axios, Vite
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB with Mongoose
-- **Authentication:** JSON Web Tokens (JWT)
-- **File Storage:** Multer
+- **Authentication:** JWT, bcrypt
+- **Real-Time Communication:** Socket.IO
+- **Media Uploads:** Multer, Cloudinary-ready support
 
-## 🚀 How to Run Locally
+## 🚀 Getting Started
 
-1.  **Clone the Repository:** `git clone <your-repo-url>`
-2.  **Start the Backend:**
-    ```bash
-    cd backend
-    npm install
-    # Create a .env file with your MONGO_URL and JWT_SECRET
-    npm start
-    ```
-3.  **Start the Frontend:**
-    ```bash
-    cd frontend
-    npm install
-    npm run dev
-    ```
+### 1. Clone the repository
+```bash
+git clone https://github.com/thanujabagadhi1625/recp_blog.git
+cd recp_blog
+```
+
+### 2. Backend setup
+```bash
+cd backend
+npm install
+```
+
+Create a `.env` file in the backend folder with:
+```env
+MONGO_URL=mongodb://127.0.0.1:27017/recipedb
+JWT_SECRET=your_secret_key
+PORT=4444
+```
+
+Start the backend server:
+```bash
+npm start
+```
+
+### 3. Frontend setup
+```bash
+cd ../frontend/recp-app
+npm install
+npm run dev
+```
+
+The frontend will run locally, and the backend will be available at `http://localhost:4444`.
+
+## 📌 Project Goals
+
+This project was built to combine modern full-stack development practices with a practical, user-friendly recipe-sharing experience.
+
+## 🤝 Contributing
+
+Contributions are welcome. Feel free to open an issue or submit a pull request.
