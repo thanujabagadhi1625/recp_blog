@@ -63,6 +63,41 @@ describe('Backend Test Suite', () => {
     });
   });
 
+  describe('Rate Limiting', () => {
+    it('returns 429 on the 4th login attempt when auth limit is configured to 3', async () => {
+      const { createApp } = require('../server');
+      const limitedApp = createApp({ authLimit: 3 });
+
+      const bcrypt = require('bcrypt');
+      const hashedPassword = await bcrypt.hash('password123', 10);
+      await User.create({
+        name: 'Rate Limit User',
+        email: 'ratelimit@example.com',
+        password: hashedPassword,
+      });
+
+      const res1 = await request(limitedApp)
+        .post('/api/users/login')
+        .send({ email: 'ratelimit@example.com', password: 'password123' });
+      expect(res1.status).toBe(200);
+
+      const res2 = await request(limitedApp)
+        .post('/api/users/login')
+        .send({ email: 'ratelimit@example.com', password: 'password123' });
+      expect(res2.status).toBe(200);
+
+      const res3 = await request(limitedApp)
+        .post('/api/users/login')
+        .send({ email: 'ratelimit@example.com', password: 'password123' });
+      expect(res3.status).toBe(200);
+
+      const res4 = await request(limitedApp)
+        .post('/api/users/login')
+        .send({ email: 'ratelimit@example.com', password: 'password123' });
+      expect(res4.status).toBe(429);
+    });
+  });
+
   describe('Auth: Signup and Login', () => {
     it('allows a user to signup and then login', async () => {
       const signupRes = await request(app)

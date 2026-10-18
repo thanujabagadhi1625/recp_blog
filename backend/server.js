@@ -3,91 +3,98 @@ const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
 const { JWT_SECRET, PORT, CLIENT_ORIGIN } = require('./config/env');
 const connectDb = require('./config/connectionDb');
 const ChatRequest = require('./models/chatRequest');
-
-const app = express();
+const { createLimiter, createAuthLimiter } = require('./middleware/rateLimiter');
+const { createUserRouter } = require('./routes/user');
 
 const clientOrigins = CLIENT_ORIGIN
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-app.use(helmet());
-app.use(express.json({ limit: '100kb' }));
+function createApp(options = {}) {
+  const app = express();
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || clientOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-  })
-);
+  app.use(helmet());
+  app.use(express.json({ limit: '100kb' }));
 
-const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 300,
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: () => process.env.NODE_ENV === 'test',
-});
-app.use('/api', generalLimiter);
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || clientOrigins.includes(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+      },
+      credentials: true,
+    })
+  );
+
+  const generalLimiter = options.generalLimiter || createLimiter(
+    options.generalLimit ? { max: options.generalLimit, skip: () => false } : undefined
+  );
+  app.use('/api', generalLimiter);
+
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok', uptime: process.uptime() });
+  });
+
+  // Prefix APIs with /api
+  app.use('/api/recipes', require('./routes/recipe'));
+  app.use('/api/comments', require('./routes/comment'));
+  app.use('/api/chats', require('./routes/chat'));
+
+  const userRouter = options.authLimit
+    ? createUserRouter({ authLimiter: createAuthLimiter({ max: options.authLimit, skip: () => false }) })
+    : (options.userRouter || require('./routes/user'));
+  app.use('/api/users', userRouter);
+
+  // 404 handler
+  app.use((req, res) => {
+    res.status(404).json({ message: `Cannot ${req.method} ${req.originalUrl}` });
+  });
+
+  // Global error handler
+  app.use((err, req, res, next) => {
+    console.error('Unhandled application error:', err);
+
+    if (err.message === 'Not allowed by CORS') {
+      return res.status(403).json({ message: 'Not allowed by CORS' });
+    }
+
+    if (err.name === 'MulterError') {
+      return res.status(400).json({ message: `Upload error: ${err.message}` });
+    }
+
+    if (err.message && (err.message.includes('file type') || err.message.includes('Unsupported file') || err.message.includes('file mismatch'))) {
+      return res.status(400).json({ message: err.message });
+    }
+
+    if (err.name === 'CastError' && err.kind === 'ObjectId') {
+      return res.status(400).json({ message: 'Invalid ID format' });
+    }
+
+    if (err.code === 11000) {
+      return res.status(409).json({ message: 'Duplicate key error' });
+    }
+
+    return res.status(500).json({ message: 'Internal Server Error' });
+  });
+
+  return app;
+}
+
+const app = createApp();
 
 if (process.env.NODE_ENV !== 'test') {
   connectDb();
 }
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', uptime: process.uptime() });
-});
-
-// Prefix APIs with /api
-app.use('/api/recipes', require('./routes/recipe'));
-app.use('/api/comments', require('./routes/comment'));
-app.use('/api/chats', require('./routes/chat'));
-app.use('/api/users', require('./routes/user'));
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ message: `Cannot ${req.method} ${req.originalUrl}` });
-});
-
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error('Unhandled application error:', err);
-
-  if (err.message === 'Not allowed by CORS') {
-    return res.status(403).json({ message: 'Not allowed by CORS' });
-  }
-
-  if (err.name === 'MulterError') {
-    return res.status(400).json({ message: `Upload error: ${err.message}` });
-  }
-
-  if (err.message && (err.message.includes('file type') || err.message.includes('Unsupported file') || err.message.includes('file mismatch'))) {
-    return res.status(400).json({ message: err.message });
-  }
-
-  if (err.name === 'CastError' && err.kind === 'ObjectId') {
-    return res.status(400).json({ message: 'Invalid ID format' });
-  }
-
-  if (err.code === 11000) {
-    return res.status(409).json({ message: 'Duplicate key error' });
-  }
-
-  return res.status(500).json({ message: 'Internal Server Error' });
-});
 
 // Create HTTP server and attach Socket.IO for real-time chat
 const server = http.createServer(app);
@@ -144,4 +151,4 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
-module.exports = { app, server, io };
+module.exports = { app, server, io, createApp };
