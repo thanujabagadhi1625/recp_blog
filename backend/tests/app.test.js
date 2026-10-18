@@ -3,11 +3,6 @@ const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const ioClient = require('socket.io-client');
 
-process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test_jwt_secret_for_unit_tests_123456';
-process.env.CLIENT_ORIGIN = 'http://localhost:5173';
-
-const { app, server, io } = require('../server');
 const User = require('../models/user');
 const Recipe = require('../models/recipe');
 const ChatRequest = require('../models/chatRequest');
@@ -17,10 +12,19 @@ describe('Backend Test Suite', () => {
   let mongoServer;
   let serverInstance;
   let serverPort;
+  let app;
+  let server;
+  let io;
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
+    process.env.MONGO_URL = mongoServer.getUri();
     await mongoose.connect(mongoServer.getUri());
+
+    const serverModule = require('../server');
+    app = serverModule.app;
+    server = serverModule.server;
+    io = serverModule.io;
 
     await new Promise((resolve) => {
       serverInstance = server.listen(0, () => {

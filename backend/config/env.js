@@ -1,8 +1,6 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-const isTest = process.env.NODE_ENV === 'test';
-
 const {
   JWT_SECRET,
   MONGO_URL,
@@ -13,19 +11,23 @@ const {
   CLOUDINARY_API_SECRET,
 } = process.env;
 
-if (!isTest && !JWT_SECRET) {
-  throw new Error('Fatal error: JWT_SECRET environment variable is missing.');
-}
+const missing = [];
+if (!JWT_SECRET) missing.push('JWT_SECRET');
+if (!MONGO_URL) missing.push('MONGO_URL');
+if (!CLIENT_ORIGIN) missing.push('CLIENT_ORIGIN');
+if (!CLOUDINARY_CLOUD_NAME) missing.push('CLOUDINARY_CLOUD_NAME');
+if (!CLOUDINARY_API_KEY) missing.push('CLOUDINARY_API_KEY');
+if (!CLOUDINARY_API_SECRET) missing.push('CLOUDINARY_API_SECRET');
 
-if (!isTest && !MONGO_URL) {
-  throw new Error('Fatal error: MONGO_URL environment variable is missing.');
+if (missing.length > 0) {
+  throw new Error(`Fatal error: Missing required environment variable(s): ${missing.join(', ')}`);
 }
 
 module.exports = {
-  JWT_SECRET: JWT_SECRET || (isTest ? 'test_jwt_secret_for_testing_12345678' : ''),
-  MONGO_URL: MONGO_URL || (isTest ? 'mongodb://127.0.0.1:27017/test_db' : ''),
-  PORT: PORT || 4444,
-  CLIENT_ORIGIN: CLIENT_ORIGIN || 'http://localhost:5173',
+  JWT_SECRET,
+  MONGO_URL,
+  PORT: PORT ? parseInt(PORT, 10) : 4444,
+  CLIENT_ORIGIN,
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET,
