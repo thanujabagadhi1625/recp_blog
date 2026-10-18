@@ -21,7 +21,7 @@ const validateSignup = [
   body('email')
     .trim()
     .isEmail()
-    .normalizeEmail()
+    .normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false })
     .withMessage('A valid email is required'),
   body('password')
     .isLength({ min: 8, max: 72 })
@@ -33,6 +33,7 @@ const validateLogin = [
   body('email')
     .trim()
     .isEmail()
+    .normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false })
     .withMessage('A valid email is required'),
   body('password')
     .notEmpty()

@@ -151,6 +151,31 @@ describe('Backend Test Suite', () => {
       expect(loginRes.body.user.email).toBe('alice@example.com');
     });
 
+    it('allows signup and login with dots and +tags in Gmail address without mismatch', async () => {
+      const email = 'John.Doe+x@gmail.com';
+      const signupRes = await request(app)
+        .post('/api/users/signup')
+        .send({
+          name: 'John Doe',
+          email,
+          password: 'password123',
+        });
+
+      expect(signupRes.status).toBe(201);
+      expect(signupRes.body).toHaveProperty('token');
+
+      const loginRes = await request(app)
+        .post('/api/users/login')
+        .send({
+          email,
+          password: 'password123',
+        });
+
+      expect(loginRes.status).toBe(200);
+      expect(loginRes.body).toHaveProperty('token');
+      expect(loginRes.body.user.email).toBe(email.toLowerCase());
+    });
+
     it('returns generic 401 for unknown email or incorrect password', async () => {
       await request(app)
         .post('/api/users/signup')
