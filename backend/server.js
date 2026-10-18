@@ -20,6 +20,14 @@ const clientOrigins = CLIENT_ORIGIN
 function createApp(options = {}) {
   const app = express();
 
+  const trustProxy = options.trustProxy !== undefined
+    ? options.trustProxy
+    : (process.env.TRUST_PROXY === '1' || process.env.TRUST_PROXY === 'true');
+
+  if (trustProxy) {
+    app.set('trust proxy', 1);
+  }
+
   app.use(helmet());
   app.use(express.json({ limit: '100kb' }));
 
@@ -82,6 +90,12 @@ function createApp(options = {}) {
 
     if (err.code === 11000) {
       return res.status(409).json({ message: 'Duplicate key error' });
+    }
+
+    const status = err.status || err.statusCode;
+    if (status && status >= 400 && status < 500) {
+      const genericMessage = status === 413 ? 'Payload too large' : 'Invalid request payload';
+      return res.status(status).json({ message: genericMessage });
     }
 
     return res.status(500).json({ message: 'Internal Server Error' });

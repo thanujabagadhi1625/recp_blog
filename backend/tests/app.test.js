@@ -63,6 +63,28 @@ describe('Backend Test Suite', () => {
     });
   });
 
+  describe('Global Error Handling and Proxy', () => {
+    it('returns 400 when malformed JSON is posted to /api/users/login', async () => {
+      const res = await request(app)
+        .post('/api/users/login')
+        .set('Content-Type', 'application/json')
+        .send('{"email": "broken json');
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body.message).toMatch(/invalid request payload|bad request/i);
+    });
+
+    it('enables trust proxy in createApp when trustProxy option is set', () => {
+      const { createApp } = require('../server');
+      const proxyApp = createApp({ trustProxy: true });
+      expect(proxyApp.get('trust proxy')).toBeTruthy();
+
+      const defaultApp = createApp();
+      expect(defaultApp.get('trust proxy')).toBeFalsy();
+    });
+  });
+
   describe('Upload Ordering', () => {
     it('returns 404 for comment on nonexistent recipe without invoking Cloudinary upload', async () => {
       const cloudinary = require('cloudinary').v2;
