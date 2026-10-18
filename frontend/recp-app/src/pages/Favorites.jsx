@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import Recpitems from "../components/recpitems";
@@ -8,7 +8,7 @@ const Favorites = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
 
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -23,11 +23,11 @@ const Favorites = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchFavorites();
-  }, [user]);
+  }, [fetchFavorites]);
 
   if (loading) {
     return <h2 style={{ textAlign: "center", marginTop: "80px" }}>Loading your favorites...</h2>;

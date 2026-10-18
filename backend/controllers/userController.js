@@ -159,7 +159,7 @@ const getMe = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
     const result = user.toObject();
     result.favorites = result.favorites.map((recipe) => ({
-      ...recipe.toObject(),
+      ...recipe,
       coverImage: getFullImageUrl(req, recipe.coverImage),
     }));
     return res.status(200).json(result);
@@ -189,9 +189,16 @@ const updateProfile = async (req, res) => {
     }
 
     await user.save();
-    const profile = user.toObject();
-    delete profile.password;
-    return res.status(200).json(profile);
+    return res.status(200).json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      favorites: user.favorites,
+      bio: user.bio,
+      favoriteCuisines: user.favoriteCuisines,
+      hobbies: user.hobbies,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Server error' });

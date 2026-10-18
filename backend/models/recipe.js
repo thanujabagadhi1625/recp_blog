@@ -22,6 +22,7 @@ const recipeSchema = new mongoose.Schema(
     cookTime: { type: Number, default: 0 },
     servings: { type: Number, default: 4 },
     coverImage: { type: String, default: 'https://via.placeholder.com/400x300?text=Recipe' },
+    coverImagePublicId: { type: String },
     tags: [{ type: String }],
     
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

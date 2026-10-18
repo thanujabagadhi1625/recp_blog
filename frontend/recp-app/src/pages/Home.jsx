@@ -1,37 +1,33 @@
-// src/pages/Home.jsx
-import React, { useState, useEffect } from "react";
-import { useLoaderData } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
 import Recpitems from "../components/recpitems";
 import axios from "axios";
 
 const Home = () => {
-  const loaderRecipes = useLoaderData();
-  const [recipes, setRecipes] = useState(loaderRecipes);
+  const [recipes, setRecipes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("");
   const [difficulty, setDifficulty] = useState("");
 
-  const fetchRecipes = async () => {
+  const fetchRecipes = useCallback(async () => {
     try {
-      let url = 'http://localhost:4444/api/recipes?';
-      if (searchTerm) url += `search=${searchTerm}&`;
-      if (category) url += `category=${category}&`;
-      if (difficulty) url += `difficulty=${difficulty}`;
-      
-      const res = await axios.get(url);
+      const params = {};
+      if (searchTerm) params.search = searchTerm;
+      if (category) params.category = category;
+      if (difficulty) params.difficulty = difficulty;
+
+      const res = await axios.get('http://localhost:4444/api/recipes', { params });
       setRecipes(res.data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [searchTerm, category, difficulty]);
 
-  // Use a useEffect to refetch when filters change, but debounce the search term
   useEffect(() => {
     const handler = setTimeout(() => {
-        fetchRecipes();
-    }, 500); // Wait 500ms after user stops typing to search
+      fetchRecipes();
+    }, 500);
     return () => clearTimeout(handler);
-  }, [searchTerm, category, difficulty]);
+  }, [fetchRecipes]);
 
   return (
     <div>
@@ -50,6 +46,8 @@ const Home = () => {
             <option value="Lunch">🥗 Lunch</option>
             <option value="Dinner">🍝 Dinner</option>
             <option value="Dessert">🍰 Dessert</option>
+            <option value="Snack">🍿 Snack</option>
+            <option value="Beverage">🥤 Beverage</option>
           </select>
           <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
             <option value="">All Levels</option>

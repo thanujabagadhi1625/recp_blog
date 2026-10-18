@@ -12,6 +12,8 @@ const AddRecipe = () => {
         description: '',
         ingredients: '',
         instructions: '',
+        category: 'Dinner',
+        difficulty: 'Medium',
         prepTime: 10,
         cookTime: 20,
         servings: 2,
@@ -108,6 +110,28 @@ const AddRecipe = () => {
                 <div className="form-group">
                     <label htmlFor="instructions">Instructions 🧑‍🍳</label>
                     <textarea id="instructions" name="instructions" placeholder="First, preheat the fun..." rows="7" value={formData.instructions} onChange={handleChange} required></textarea>
+                </div>
+
+                <div className="form-grid">
+                    <div className="form-group">
+                        <label htmlFor="category">Category 🍽️</label>
+                        <select id="category" name="category" value={formData.category} onChange={handleChange}>
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                            <option value="Dessert">Dessert</option>
+                            <option value="Snack">Snack</option>
+                            <option value="Beverage">Beverage</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="difficulty">Difficulty ⚡</label>
+                        <select id="difficulty" name="difficulty" value={formData.difficulty} onChange={handleChange}>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div className="form-grid">

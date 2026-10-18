@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ChatRequests = () => {
   const { user, token } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +26,7 @@ const ChatRequests = () => {
       }
     };
     fetchRequests();
-  }, [user]);
+  }, [user, token]);
 
   if (!user) {
     return <h2 style={{ textAlign: 'center', marginTop: '80px' }}>Please log in to view chat requests.</h2>;
@@ -54,7 +55,7 @@ const ChatRequests = () => {
                   onClick={async () => {
                     try {
                       await axios.post(`http://localhost:4444/api/chats/request/${request._id}/respond`, { action: 'accepted' }, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
-                      window.location.href = `/chat/${request._id}`;
+                      navigate(`/chat/${request._id}`);
                     } catch (err) {
                       console.error('Failed to accept', err);
                       alert(err.response?.data?.message || 'Failed to accept');

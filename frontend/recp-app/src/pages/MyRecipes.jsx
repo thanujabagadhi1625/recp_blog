@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 import Recpitems from "../components/recpitems";
@@ -9,7 +9,7 @@ const MyRecipes = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
 
-  const fetchUserRecipes = async () => {
+  const fetchUserRecipes = useCallback(async () => {
     if (!user) {
       setLoading(false);
       return;
@@ -25,11 +25,11 @@ const MyRecipes = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchUserRecipes();
-  }, [user]);
+  }, [fetchUserRecipes]);
 
   if (loading) {
     return <h2 style={{ textAlign: "center", marginTop: "80px" }}>Loading your recipes...</h2>;

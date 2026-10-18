@@ -15,7 +15,7 @@ const RecipeDetail = () => {
     const [replyText, setReplyText] = useState("");
     const [commentLoading, setCommentLoading] = useState(false);
     const { id } = useParams();
-    const { user } = useContext(AuthContext);
+    const { user, login } = useContext(AuthContext);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -52,7 +52,7 @@ const RecipeDetail = () => {
                 await axios.delete(`http://localhost:4444/api/recipes/${id}`);
                 alert("Recipe deleted successfully!");
                 navigate("/my-recipes");
-            } catch (err) {
+            } catch {
                 alert("Failed to delete recipe.");
             }
         }
@@ -92,17 +92,31 @@ const RecipeDetail = () => {
         }
     };
 
-    const handleFavorite = async () => {
+    const isFavorite = Boolean(
+        user?.favorites?.some((fav) => {
+            const favId = typeof fav === 'object' && fav !== null ? fav._id : fav;
+            return favId?.toString() === recipe?._id?.toString();
+        })
+    );
+
+    const handleToggleFavorite = async () => {
         if (!user) {
-            alert('Please log in to add favorites.');
+            alert('Please log in to manage favorites.');
             return;
         }
         try {
-            await axios.post(`http://localhost:4444/api/users/favorites/${recipe._id}`);
-            alert('Added to favorites');
+            if (isFavorite) {
+                const res = await axios.delete(`http://localhost:4444/api/users/favorites/${recipe._id}`);
+                login(localStorage.getItem('token'), { ...user, favorites: res.data.favorites });
+                alert('Removed from favorites');
+            } else {
+                const res = await axios.post(`http://localhost:4444/api/users/favorites/${recipe._id}`);
+                login(localStorage.getItem('token'), { ...user, favorites: res.data.favorites });
+                alert('Added to favorites');
+            }
         } catch (err) {
-            console.error('Failed to add favorite', err);
-            alert(err.response?.data?.message || 'Unable to add favorite');
+            console.error('Failed to update favorite', err);
+            alert(err.response?.data?.message || 'Unable to update favorites');
         }
     };
 
@@ -188,7 +202,9 @@ const RecipeDetail = () => {
             )}
             {user && (
                 <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
-                    <button onClick={handleFavorite} className="favorite-btn">Add to Favorites</button>
+                    <button onClick={handleToggleFavorite} className="favorite-btn">
+                        {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                    </button>
                     <button onClick={() => {
                         navigator.clipboard.writeText(window.location.href);
                         alert('Recipe link copied to clipboard!');

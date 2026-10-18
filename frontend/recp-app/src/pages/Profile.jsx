@@ -56,7 +56,8 @@ const Profile = () => {
       };
       const res = await axios.put('http://localhost:4444/api/users/me', payload);
       setProfile(res.data);
-      login(localStorage.getItem('token'), res.data);
+      const updatedUser = { ...user, ...res.data, id: res.data.id || user.id };
+      login(localStorage.getItem('token'), updatedUser);
       setMessage('Profile updated successfully!');
     } catch (err) {
       console.error('Failed to update profile', err);

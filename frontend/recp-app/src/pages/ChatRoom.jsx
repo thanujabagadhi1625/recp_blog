@@ -10,7 +10,6 @@ const ChatRoom = () => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [file, setFile] = useState(null);
-  const [chatRequest, setChatRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
@@ -20,7 +19,6 @@ const ChatRoom = () => {
         setLoading(true);
         const res = await axios.get(`http://localhost:4444/api/chats/${requestId}/messages`, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
         setMessages(res.data);
-        setChatRequest(res.data.length ? res.data[0] : null);
       } catch (err) {
         console.error('Failed to load chat messages', err);
       } finally {
@@ -29,7 +27,7 @@ const ChatRoom = () => {
     };
 
     fetchChat();
-  }, [requestId]);
+  }, [requestId, token]);
 
   // Socket.IO real-time updates
   const socketRef = useRef();
@@ -37,7 +35,10 @@ const ChatRoom = () => {
     socketRef.current = io('http://localhost:4444');
     socketRef.current.emit('join', requestId);
     socketRef.current.on('new_message', (msg) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) => {
+        if (prev.some((m) => m._id === msg._id)) return prev;
+        return [...prev, msg];
+      });
     });
     return () => {
       if (socketRef.current) {
@@ -65,26 +66,21 @@ const ChatRoom = () => {
       const body = new FormData();
       if (text.trim()) body.append('text', text.trim());
       if (file) body.append('attachment', file);
-      await axios.post(`http://localhost:4444/api/chats/${requestId}/messages`, body, {
+      const res = await axios.post(`http://localhost:4444/api/chats/${requestId}/messages`, body, {
         headers: { 'Content-Type': 'multipart/form-data', Authorization: token ? `Bearer ${token}` : undefined },
       });
       setText('');
       setFile(null);
-      const res = await axios.get(`http://localhost:4444/api/chats/${requestId}/messages`, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
-      setMessages(res.data);
+      if (res.data) {
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === res.data._id)) return prev;
+          return [...prev, res.data];
+        });
+      }
     } catch (err) {
       console.error('Failed to send message', err);
     } finally {
       setSending(false);
-    }
-  };
-
-  const respondToRequest = async (action) => {
-    try {
-      await axios.post(`http://localhost:4444/api/chats/request/${requestId}/respond`, { action }, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
-      alert(`Chat request ${action}`);
-    } catch (err) {
-      console.error('Failed to respond to request', err);
     }
   };
 
@@ -103,10 +99,14 @@ const ChatRoom = () => {
         {messages.length === 0 ? (
           <p>No messages yet.</p>
         ) : (
-          messages.map((message) => (
+          messages.map((message) => {
+            const sender = message.senderId?._id || message.senderId;
+            const currentUserId = user.id || user._id;
+            const isOwn = sender?.toString() === currentUserId?.toString();
+            return (
             <div key={message._id} style={{ marginBottom: '18px' }}>
-              <div style={{ display: 'flex', justifyContent: message.senderId === user.id ? 'flex-end' : 'flex-start' }}>
-                <div style={{ maxWidth: '70%', background: message.senderId === user.id ? '#d2f8d2' : '#f4f4f4', padding: '12px 16px', borderRadius: '14px' }}>
+              <div style={{ display: 'flex', justifyContent: isOwn ? 'flex-end' : 'flex-start' }}>
+                <div style={{ maxWidth: '70%', background: isOwn ? '#d2f8d2' : '#f4f4f4', padding: '12px 16px', borderRadius: '14px' }}>
                   {message.text && <p style={{ margin: 0 }}>{message.text}</p>}
                   {message.attachmentUrl && (
                     (message.attachmentUrl.startsWith('http') || message.attachmentUrl.startsWith('data:')) ? (
@@ -127,7 +127,8 @@ const ChatRoom = () => {
                 </div>
               </div>
             </div>
-          ))
+          );
+        })
         )}
       </div>
 

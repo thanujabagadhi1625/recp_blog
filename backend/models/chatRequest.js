@@ -9,4 +9,6 @@ const chatRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+chatRequestSchema.index({ senderId: 1, receiverId: 1 }, { unique: true });
+
 module.exports = mongoose.model('ChatRequest', chatRequestSchema);

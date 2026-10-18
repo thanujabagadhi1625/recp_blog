@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
 
 const EditRecipe = () => {
-    const { user } = useContext(AuthContext);
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -13,6 +11,8 @@ const EditRecipe = () => {
         description: '',
         ingredients: '',
         instructions: '',
+        category: 'Dinner',
+        difficulty: 'Medium',
         prepTime: 0,
         cookTime: 0,
         servings: 1,
@@ -26,17 +26,19 @@ const EditRecipe = () => {
     useEffect(() => {
         const fetchRecipeData = async () => {
             try {
-                const res = await axios.get(`http://localhost:4444/api/recipes/${id}`);
+                const res = await axios.get(`http://localhost:4444/api/recipes/${id}?noview=1`);
                 const recipe = res.data;
                 setFormData({
                     title: recipe.title,
                     description: recipe.description,
                     ingredients: recipe.ingredients,
                     instructions: recipe.instructions,
+                    category: recipe.category || 'Dinner',
+                    difficulty: recipe.difficulty || 'Medium',
                     prepTime: recipe.prepTime,
                     cookTime: recipe.cookTime,
                     servings: recipe.servings,
-                    tags: recipe.tags.join(', '),
+                    tags: (recipe.tags || []).join(', '),
                 });
                 setCurrentImage(recipe.coverImage || '');
             } catch (error) {
@@ -100,7 +102,6 @@ const EditRecipe = () => {
 
     if (loading) return <h2>Loading editor...</h2>;
 
-    // The JSX below is updated to use the classes from index.css for proper styling
     return (
         <div className="form-container">
             <h2>Edit Your Recipe</h2>
@@ -123,6 +124,28 @@ const EditRecipe = () => {
                 <div className="form-group">
                     <label htmlFor="instructions">Instructions</label>
                     <textarea id="instructions" name="instructions" rows="7" value={formData.instructions} onChange={handleChange} required></textarea>
+                </div>
+
+                <div className="form-grid">
+                    <div className="form-group">
+                        <label htmlFor="category">Category</label>
+                        <select id="category" name="category" value={formData.category} onChange={handleChange}>
+                            <option value="Breakfast">Breakfast</option>
+                            <option value="Lunch">Lunch</option>
+                            <option value="Dinner">Dinner</option>
+                            <option value="Dessert">Dessert</option>
+                            <option value="Snack">Snack</option>
+                            <option value="Beverage">Beverage</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="difficulty">Difficulty</label>
+                        <select id="difficulty" name="difficulty" value={formData.difficulty} onChange={handleChange}>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div className="form-grid">

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const ChatRequest = require('../models/chatRequest');
 const ChatMessage = require('../models/chatMessage');
 const User = require('../models/user');
@@ -8,13 +9,36 @@ if (process.env.CLOUDINARY_URL) cloudinary.config({ url: process.env.CLOUDINARY_
 const sendChatRequest = async (req, res) => {
   try {
     const receiverId = req.params.receiverId;
+    if (!mongoose.isValidObjectId(receiverId)) {
+      return res.status(400).json({ message: 'Invalid receiver ID.' });
+    }
     if (receiverId === req.userId) {
       return res.status(400).json({ message: 'Cannot send chat request to yourself.' });
     }
 
-    const existing = await ChatRequest.findOne({ senderId: req.userId, receiverId });
+    const receiver = await User.findById(receiverId);
+    if (!receiver) {
+      return res.status(404).json({ message: 'Receiver user not found.' });
+    }
+
+    const existing = await ChatRequest.findOne({
+      $or: [
+        { senderId: req.userId, receiverId },
+        { senderId: receiverId, receiverId: req.userId },
+      ],
+    });
+
     if (existing) {
-      return res.status(400).json({ message: 'Chat request already sent.' });
+      if (existing.status === 'pending' || existing.status === 'accepted') {
+        return res.status(400).json({ message: 'Chat request already exists or accepted.' });
+      }
+      if (existing.status === 'declined') {
+        existing.senderId = req.userId;
+        existing.receiverId = receiverId;
+        existing.status = 'pending';
+        await existing.save();
+        return res.status(200).json(existing);
+      }
     }
 
     const request = await ChatRequest.create({ senderId: req.userId, receiverId });
@@ -31,6 +55,9 @@ const respondToChatRequest = async (req, res) => {
     if (!request) return res.status(404).json({ message: 'Chat request not found.' });
     if (request.receiverId.toString() !== req.userId) {
       return res.status(403).json({ message: 'Not authorized to respond to this request.' });
+    }
+    if (request.status !== 'pending') {
+      return res.status(409).json({ message: 'Can only respond to pending chat requests.' });
     }
 
     const action = req.body.action;
@@ -69,7 +96,9 @@ const getMessages = async (req, res) => {
       return res.status(400).json({ message: 'Chat request is not accepted.' });
     }
 
-    const messages = await ChatMessage.find({ chatRequestId: chatRequest._id }).sort({ createdAt: 1 });
+    const messages = await ChatMessage.find({ chatRequestId: chatRequest._id })
+      .populate('senderId', 'name avatar')
+      .sort({ createdAt: 1 });
     return res.status(200).json(messages);
   } catch (err) {
     console.error(err);
@@ -101,8 +130,8 @@ const sendMessage = async (req, res) => {
       attachmentType: req.file ? req.file.mimetype : undefined,
     });
 
-    // populate sender info for response
-    const savedMessage = await ChatMessage.findById(message._id).populate('senderId', 'name avatar email');
+    // populate sender info for response (name avatar only, never email)
+    const savedMessage = await ChatMessage.findById(message._id).populate('senderId', 'name avatar');
 
     // Emit real-time message to room (room name = chatRequest id)
     const io = req.app.locals.io;

@@ -4,28 +4,35 @@ import axios from 'axios';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
+  const [token, setToken] = useState(() => {
     const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+    if (storedToken) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      return storedToken;
     }
-    setLoading(false);
-  }, []);
+    return null;
+  });
 
-  const login = (token, userData) => {
-    localStorage.setItem('token', token);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        return JSON.parse(storedUser);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const [loading] = useState(false);
+
+  const login = (newToken, userData) => {
+    localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(userData));
-    setToken(token);
+    setToken(newToken);
     setUser(userData);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
   };
 
   const logout = () => {
@@ -51,11 +58,11 @@ export const AuthProvider = ({ children }) => {
     return () => {
       axios.interceptors.response.eject(resInterceptor);
     };
-  }, [token]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
