@@ -25,25 +25,30 @@ FoodieVerse is a full-stack MERN application (Express 5 + Mongoose on Node.js, R
 
 ---
 
-## 🎨 Theme System & Color Palette
+## 🎨 Theme System & Color Palette ("Phantom's Embrace")
 
-FoodieVerse implements a design-token CSS variable architecture defined in `src/styles/theme.css`:
+FoodieVerse implements a design-token CSS variable architecture based on the **"Phantom's Embrace"** palette (`#1A1A2E`, `#16213E`, `#0F3460`, `#E94560`, `#F9F9F9`), defined in `src/styles/theme.css`:
 
 | Token | Dark Mode (Default) | Light Mode | Usage |
 |---|---|---|---|
-| `--bg` | `#0f0407` | `#fbf3f2` | App background |
-| `--surface` | `#1a0a0f` | `#ffffff` | Cards, modals, navbar background |
-| `--surface-2` | `#261016` | `#f5e9e8` | Hover states, secondary panels, received chat bubbles |
-| `--border` | `#3a1823` | `#e6d3d4` | Card, input, and divider borders |
-| `--text` | `#f4e8ea` | `#2a1014` | Primary typography |
-| `--text-muted` | `#b79aa0` | `#74575b` | Subtitles, timestamps, metadata |
-| `--primary` | `#9b111e` | `#9b111e` | Primary buttons, sent chat bubbles |
-| `--primary-hover` | `#b3202f` | `#b3202f` | Hover state for primary buttons |
-| `--accent` | `#e63950` | `#e63950` | Active highlights, focus rings, links |
-| `--danger` | `#ff5d6c` | `#d93848` | Delete buttons, error alerts |
-| `--success` | `#3ecf8e` | `#198754` | Success banners, accept buttons |
+| `--bg` | `#1A1A2E` | `#F9F9F9` | Page background |
+| `--surface` | `#16213E` | `#FFFFFF` | Cards, navbar, modal, inputs |
+| `--surface-2` | `#0F3460` | `#EEF1F8` | Raised/hover surfaces, selected tab, received chat bubbles |
+| `--border` | `#2A3A6A` | `#D6DBEA` | 1px borders for cards, inputs, and dividers |
+| `--text` | `#F9F9F9` | `#1A1A2E` | Primary typography |
+| `--text-muted` | `#A9B1C6` | `#4A5170` | Subtitles, timestamps, metadata, placeholders |
+| `--primary` | `#C8274A` | `#C8274A` | Primary buttons (5.5:1 contrast with white text), sent chat bubbles |
+| `--primary-hover` | `#E94560` | `#A81F3D` | Hover state for primary buttons |
+| `--accent` | `#E94560` | `#E94560` | Icons, active nav underline, focus rings, like/bookmark filled state |
+| `--accent-text` | `#FF6B83` | `#C8274A` | Accent-colored small text and links on dark/light backgrounds (>=5.5:1 contrast) |
+| `--header-text` | `#F9F9F9` | `#0F3460` | Brand and header text |
+| `--danger` | `#FF6B83` | `#C8274A` | Delete buttons, error alerts |
+| `--success` | `#3ECF8E` | `#198754` | Success banners, accept buttons |
 
-Preference is stored in `localStorage` under the key `'theme'` (`'dark'` or `'light'`).
+- **Hero/Header Gradient:** `linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%)`, with a soft `#E94560` glow on the search bar and primary buttons on hover/focus.
+- **Chat:** Sent bubbles use `--primary` with white text (right-aligned); received bubbles use `--surface-2` with `--text` (left-aligned).
+- **Rules:** Primary buttons use `--primary` with white text; secondary buttons use `--surface-2` with `--border`; focus ring is 2px solid `--accent` with 2px offset; every text/background pair meets WCAG AA in both themes.
+- Preference is stored in `localStorage` under the key `'theme'` (`'dark'` or `'light'`).
 
 ---
 

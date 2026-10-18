@@ -1,28 +1,30 @@
-/* src/styles/theme.css - Design tokens and theme system */
+/* src/styles/theme.css - Design tokens and theme system: "Phantom's Embrace" */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
   color-scheme: dark;
-  --bg: #0f0407;
-  --surface: #1a0a0f;
-  --surface-2: #261016;
-  --border: #3a1823;
-  --text: #f4e8ea;
-  --text-muted: #b79aa0;
-  --primary: #9b111e;
-  --primary-hover: #b3202f;
-  --accent: #e63950;
-  --danger: #ff5d6c;
-  --success: #3ecf8e;
-  --shadow: rgba(0, 0, 0, 0.55);
-  --header-gradient: linear-gradient(135deg, #2a0610 0%, #5c0a17 100%);
-  --glow: 0 0 15px rgba(155, 17, 30, 0.35);
-  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
-  --card-shadow-hover: 0 8px 30px rgba(155, 17, 30, 0.25);
-  --input-bg: #1a0a0f;
+  --bg: #1A1A2E;                 /* page background */
+  --surface: #16213E;            /* cards, navbar, modal, inputs */
+  --surface-2: #0F3460;          /* raised/hover surfaces, selected tab, received chat bubbles */
+  --border: #2A3A6A;             /* derived: lighter than surface for 1px borders */
+  --text: #F9F9F9;
+  --text-muted: #A9B1C6;
+  --primary: #C8274A;            /* buttons with white text (5.5:1 contrast) */
+  --primary-hover: #E94560;
+  --accent: #E94560;             /* icons, active nav underline, focus ring, like/bookmark filled state, borders on hover */
+  --accent-text: #FF6B83;        /* accent-colored SMALL TEXT/links on dark (6:1 contrast) */
+  --danger: #FF6B83;
+  --success: #3ECF8E;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --glow: rgba(233, 69, 96, 0.35);
+  --header-gradient: linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%);
+  --header-text: #F9F9F9;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: 0 8px 30px rgba(233, 69, 96, 0.25);
+  --input-bg: #16213E;
   --white: #ffffff;
   --font-family: 'Poppins', sans-serif;
-  --modal-backdrop: rgba(0, 0, 0, 0.75);
+  --modal-backdrop: rgba(15, 20, 35, 0.75);
 
   /* Compatibility aliases */
   --primary-color: var(--primary);
@@ -34,26 +36,28 @@
 
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #fbf3f2;
-  --surface: #ffffff;
-  --surface-2: #f5e9e8;
-  --border: #e6d3d4;
-  --text: #2a1014;
-  --text-muted: #74575b;
-  --primary: #9b111e;
-  --primary-hover: #b3202f;
-  --accent: #e63950;
-  --danger: #d93848;
+  --bg: #F9F9F9;
+  --surface: #FFFFFF;
+  --surface-2: #EEF1F8;
+  --border: #D6DBEA;
+  --text: #1A1A2E;
+  --text-muted: #4A5170;
+  --primary: #C8274A;
+  --primary-hover: #A81F3D;
+  --accent: #E94560;
+  --accent-text: #C8274A;
+  --header-text: #0F3460;
+  --danger: #C8274A;
   --success: #198754;
-  --shadow: rgba(42, 16, 20, 0.08);
-  --header-gradient: linear-gradient(135deg, #2a0610 0%, #5c0a17 100%);
-  --glow: 0 0 15px rgba(155, 17, 30, 0.15);
-  --card-shadow: 0 4px 15px rgba(42, 16, 20, 0.08);
-  --card-shadow-hover: 0 8px 25px rgba(155, 17, 30, 0.18);
-  --input-bg: #ffffff;
+  --shadow: rgba(26, 26, 46, 0.08);
+  --glow: rgba(233, 69, 96, 0.2);
+  --header-gradient: linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%);
+  --card-shadow: 0 4px 15px rgba(26, 26, 46, 0.08);
+  --card-shadow-hover: 0 8px 25px rgba(200, 39, 74, 0.18);
+  --input-bg: #FFFFFF;
   --white: #ffffff;
   --font-family: 'Poppins', sans-serif;
-  --modal-backdrop: rgba(15, 4, 7, 0.65);
+  --modal-backdrop: rgba(26, 26, 46, 0.65);
 
   /* Compatibility aliases */
   --primary-color: var(--primary);
@@ -83,6 +87,11 @@ html, body {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+::placeholder {
+  color: var(--text-muted);
+  opacity: 0.85;
 }
 
 /* Scrollbars */

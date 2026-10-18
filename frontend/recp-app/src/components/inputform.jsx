@@ -79,7 +79,7 @@ function Inputform({ setIsOpen }) {
 
       {error && <p className="error" style={{color: 'var(--danger)', textAlign: 'center'}}>{error}</p>}
 
-      <p onClick={() => setIsSignup(!isSignup)} style={{cursor: 'pointer', textAlign: 'center', marginTop: '10px', color: 'var(--accent)'}}>
+      <p onClick={() => setIsSignup(!isSignup)} style={{cursor: 'pointer', textAlign: 'center', marginTop: '10px', color: 'var(--accent-text)'}}>
         {isSignup ? "Already have an account? Login" : "Create New Account"}
       </p>
     </form>

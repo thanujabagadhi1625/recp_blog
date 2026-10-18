@@ -59,7 +59,7 @@ const UserSearch = () => {
                     }}
                     style={{ padding: '10px 14px', background: 'var(--success)', color: 'var(--white)', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
                   >Send Chat Request</button>
-                  <Link to={`/chat/requests`} style={{ color: 'var(--accent)', alignSelf: 'center', textDecoration: 'none' }}>Requests</Link>
+                  <Link to={`/chat/requests`} style={{ color: 'var(--accent-text)', alignSelf: 'center', textDecoration: 'none' }}>Requests</Link>
                 </div>
               </div>
             </div>

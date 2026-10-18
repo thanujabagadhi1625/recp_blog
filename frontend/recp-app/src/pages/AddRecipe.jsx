@@ -85,7 +85,7 @@ const AddRecipe = () => {
                     padding: '10px',
                     borderRadius: '8px',
                     marginBottom: '16px',
-                    color: 'var(--accent)',
+                    color: 'var(--accent-text)',
                 }}
             >
                 <strong>Warning:</strong> Do not post personal photos or images
