@@ -1,10 +1,8 @@
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import client from '../api/client';
 import { Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
 
 const UserSearch = () => {
-  const { token } = useContext(AuthContext);
   const [query, setQuery] = useState('');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -12,7 +10,7 @@ const UserSearch = () => {
   const handleSearch = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:4444/api/users/search?q=${encodeURIComponent(query)}`);
+      const res = await client.get(`/api/users/search?q=${encodeURIComponent(query)}`);
       setUsers(res.data);
     } catch (err) {
       console.error('Failed to search users', err);
@@ -41,7 +39,7 @@ const UserSearch = () => {
           users.map((user) => (
             <div key={user._id} style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '14px', marginBottom: '12px' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                <img src={user.avatar || 'https://via.placeholder.com/80'} alt={user.name} style={{ width: '80px', borderRadius: '12px' }} />
+                <img src={user.avatar || '/placeholder.svg'} alt={user.name} style={{ width: '80px', borderRadius: '12px' }} />
                 <div>
                   <h3>{user.name}</h3>
                   <p>{user.bio}</p>
@@ -52,7 +50,7 @@ const UserSearch = () => {
                   <button
                     onClick={async () => {
                       try {
-                        await axios.post(`http://localhost:4444/api/chats/request/${user._id}`, {}, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
+                        await client.post(`/api/chats/request/${user._id}`);
                         alert('Chat request sent');
                       } catch (err) {
                         console.error('Failed to send chat request', err);

@@ -1,12 +1,11 @@
-// src/components/recpitems.jsx
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { FaHeart, FaUser } from "react-icons/fa";
 import { AuthContext } from "../context/AuthContext";
-import axios from "axios";
+import client from "../api/client";
 
 function Recpitems({ recipes, onUpdate }) {
-  const { user, token } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   if (!recipes || recipes.length === 0)
     return <h2 style={{textAlign: 'center', marginTop: '80px', color: '#666', fontSize: '24px'}}>No recipes found 🍳</h2>;
@@ -20,10 +19,7 @@ function Recpitems({ recipes, onUpdate }) {
     }
 
     try {
-      // Axios instance with auth headers is needed if not set globally
-      await axios.post(`http://localhost:4444/api/recipes/${recipeId}/like`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await client.post(`/api/recipes/${recipeId}/like`);
       if (onUpdate) onUpdate(); // Re-fetch recipes to show updated like count
     } catch (err) {
       console.error("Failed to like recipe:", err);
@@ -36,7 +32,7 @@ function Recpitems({ recipes, onUpdate }) {
         {recipes.map((item) => (
           <Link to={`/recipe/${item._id}`} key={item._id} className="recipe-card">
             <img 
-              src={item.coverImage || "https://via.placeholder.com/400x300?text=Recipe"} 
+              src={item.coverImage || "/placeholder.svg"} 
               alt={item.title} 
             />
             <div className="recipe-card-content">

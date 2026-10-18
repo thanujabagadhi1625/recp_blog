@@ -2,9 +2,6 @@ const mongoose = require('mongoose');
 const ChatRequest = require('../models/chatRequest');
 const ChatMessage = require('../models/chatMessage');
 const User = require('../models/user');
-const fs = require('fs');
-const cloudinary = require('cloudinary').v2;
-if (process.env.CLOUDINARY_URL) cloudinary.config({ url: process.env.CLOUDINARY_URL });
 
 const sendChatRequest = async (req, res) => {
   try {
@@ -104,8 +101,9 @@ const getMessages = async (req, res) => {
 
     const messages = await ChatMessage.find({ chatRequestId: chatRequest._id })
       .populate('senderId', 'name avatar')
-      .sort({ createdAt: 1 });
-    return res.status(200).json(messages);
+      .sort({ createdAt: -1 })
+      .limit(100);
+    return res.status(200).json(messages.reverse());
   } catch (err) {
     if (err.name === 'CastError') {
       return res.status(400).json({ message: 'Invalid chat request ID format' });

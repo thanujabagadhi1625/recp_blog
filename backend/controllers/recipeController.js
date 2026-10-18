@@ -1,16 +1,8 @@
 const Recipe = require('../models/recipe');
 const User = require('../models/user');
 const Comment = require('../models/comment');
-const fs = require('fs');
 const cloudinary = require('cloudinary').v2;
 if (process.env.CLOUDINARY_URL) cloudinary.config({ url: process.env.CLOUDINARY_URL });
-
-const getFullImageUrl = (req, imagePath) => {
-    if (!imagePath) return imagePath;
-    if (imagePath.startsWith('http')) return imagePath;
-    const host = req.get('host');
-    return `${req.protocol}://${host}${imagePath}`;
-};
 
 const parseTags = (tags) => {
     if (!tags) return [];
@@ -21,10 +13,13 @@ const parseTags = (tags) => {
     return [];
 };
 
-// --- 1. GET ALL RECIPES (Listing & Searching) ---
+// --- 1. GET ALL RECIPES (Listing & Searching with Pagination) ---
 const getRecipes = async (req, res) => {
     try {
         const { search, category, cuisine, difficulty, sort } = req.query;
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const limit = Math.max(1, parseInt(req.query.limit, 10) || 12);
+        const skip = (page - 1) * limit;
         
         let query = {};
 
@@ -40,16 +35,25 @@ const getRecipes = async (req, res) => {
         if (sort === 'popular') sortOption = { viewCount: -1 };
         if (sort === 'quickest') sortOption = { cookTime: 1 };
 
-        const recipes = await Recipe.find(query).sort(sortOption).populate('userId', 'name avatar');
-        const mapped = recipes.map((recipe) => {
+        const total = await Recipe.countDocuments(query);
+        const pages = Math.ceil(total / limit) || 1;
+
+        const recipes = await Recipe.find(query)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit)
+            .populate('userId', 'name avatar');
+
+        const items = recipes.map((recipe) => {
             const recipeObj = recipe.toObject();
-            recipeObj.coverImage = getFullImageUrl(req, recipeObj.coverImage);
+            recipeObj.coverImage = recipeObj.coverImage || '';
             return recipeObj;
         });
-        return res.status(200).json(mapped);
+
+        return res.status(200).json({ items, total, page, pages });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -72,7 +76,7 @@ const getRecipe = async (req, res) => {
         if (!recipe) return res.status(404).json({ message: 'Recipe not found' });
 
         const recipeObj = recipe.toObject();
-        recipeObj.coverImage = getFullImageUrl(req, recipeObj.coverImage);
+        recipeObj.coverImage = recipeObj.coverImage || '';
         return res.status(200).json(recipeObj);
     } catch (err) {
         if (err.name === 'CastError') {
@@ -319,7 +323,7 @@ const getUserRecipes = async (req, res) => {
         const recipes = await Recipe.find({ userId: req.params.userId }).sort({ createdAt: -1 });
         const mapped = recipes.map((recipe) => {
             const recipeObj = recipe.toObject();
-            recipeObj.coverImage = getFullImageUrl(req, recipeObj.coverImage);
+            recipeObj.coverImage = recipeObj.coverImage || '';
             return recipeObj;
         });
         return res.status(200).json(mapped);

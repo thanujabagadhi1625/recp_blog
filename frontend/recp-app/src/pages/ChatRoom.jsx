@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import client from '../api/client';
 import { AuthContext } from '../context/AuthContext';
 import { io } from 'socket.io-client';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4444';
 
 const ChatRoom = () => {
   const { requestId } = useParams();
@@ -17,7 +19,7 @@ const ChatRoom = () => {
     const fetchChat = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:4444/api/chats/${requestId}/messages`, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
+        const res = await client.get(`/api/chats/${requestId}/messages`);
         setMessages(res.data);
       } catch (err) {
         console.error('Failed to load chat messages', err);
@@ -27,12 +29,12 @@ const ChatRoom = () => {
     };
 
     fetchChat();
-  }, [requestId, token]);
+  }, [requestId]);
 
   // Socket.IO real-time updates
   const socketRef = useRef();
   useEffect(() => {
-    socketRef.current = io('http://localhost:4444', { auth: { token } });
+    socketRef.current = io(API_URL, { auth: { token } });
     socketRef.current.emit('join', requestId);
     socketRef.current.on('new_message', (msg) => {
       setMessages((prev) => {
@@ -66,9 +68,7 @@ const ChatRoom = () => {
       const body = new FormData();
       if (text.trim()) body.append('text', text.trim());
       if (file) body.append('attachment', file);
-      const res = await axios.post(`http://localhost:4444/api/chats/${requestId}/messages`, body, {
-        headers: { 'Content-Type': 'multipart/form-data', Authorization: token ? `Bearer ${token}` : undefined },
-      });
+      const res = await client.post(`/api/chats/${requestId}/messages`, body);
       setText('');
       setFile(null);
       if (res.data) {
@@ -117,9 +117,9 @@ const ChatRoom = () => {
                       )
                     ) : (
                       message.attachmentType?.startsWith('image/') ? (
-                        <img src={`http://localhost:4444${message.attachmentUrl}`} alt="attachment" style={{ width: '100%', marginTop: '10px', borderRadius: '12px' }} />
+                        <img src={`${API_URL}${message.attachmentUrl}`} alt="attachment" style={{ width: '100%', marginTop: '10px', borderRadius: '12px' }} />
                       ) : (
-                        <video controls src={`http://localhost:4444${message.attachmentUrl}`} style={{ width: '100%', marginTop: '10px', borderRadius: '12px' }} />
+                        <video controls src={`${API_URL}${message.attachmentUrl}`} style={{ width: '100%', marginTop: '10px', borderRadius: '12px' }} />
                       )
                     )
                   )}

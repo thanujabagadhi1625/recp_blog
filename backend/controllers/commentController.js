@@ -1,25 +1,27 @@
 const Comment = require('../models/comment');
 const Recipe = require('../models/recipe');
 const User = require('../models/user');
-const fs = require('fs');
-const cloudinary = require('cloudinary').v2;
-if (process.env.CLOUDINARY_URL) cloudinary.config({ url: process.env.CLOUDINARY_URL });
 
 const getCommentsByRecipe = async (req, res) => {
   try {
-    const comments = await Comment.find({ recipeId: req.params.recipeId }).sort({ createdAt: 1 }).lean();
+    const comments = await Comment.find({ recipeId: req.params.recipeId }).sort({ createdAt: -1 }).limit(100).lean();
+    comments.reverse();
     const commentMap = {};
     const nested = [];
 
     comments.forEach((comment) => {
       comment.children = [];
-      commentMap[comment._id] = comment;
+      commentMap[comment._id.toString()] = comment;
     });
 
     comments.forEach((comment) => {
       if (comment.parentId) {
         const parent = commentMap[comment.parentId.toString()];
-        if (parent) parent.children.push(comment);
+        if (parent) {
+          parent.children.push(comment);
+        } else {
+          nested.push(comment);
+        }
       } else {
         nested.push(comment);
       }

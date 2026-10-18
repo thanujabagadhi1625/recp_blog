@@ -85,6 +85,22 @@ header ul li a:hover, header ul li:hover {
   color: var(--primary-color);
 }
 
+.login-btn {
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+}
+
+.login-btn:hover {
+  color: var(--primary-color);
+}
+
 .logout-btn {
   background: var(--primary-color);
   color: #fff;
@@ -104,6 +120,34 @@ header ul li a:hover, header ul li:hover {
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.pagination button {
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Footer */

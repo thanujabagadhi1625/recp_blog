@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import client from '../api/client';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
@@ -61,7 +61,7 @@ const AddRecipe = () => {
                 }
             });
 
-            await axios.post("http://localhost:4444/api/recipes", bodyFormData);
+            await client.post("/api/recipes", bodyFormData);
             alert("Recipe added! Yum! 🎉");
             navigate("/my-recipes");
         } catch (err) {

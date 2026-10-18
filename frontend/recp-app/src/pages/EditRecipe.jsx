@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import client from '../api/client';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const EditRecipe = () => {
@@ -26,7 +26,7 @@ const EditRecipe = () => {
     useEffect(() => {
         const fetchRecipeData = async () => {
             try {
-                const res = await axios.get(`http://localhost:4444/api/recipes/${id}?noview=1`);
+                const res = await client.get(`/api/recipes/${id}?noview=1`);
                 const recipe = res.data;
                 setFormData({
                     title: recipe.title,
@@ -88,7 +88,7 @@ const EditRecipe = () => {
                 bodyFormData.append('coverImage', selectedFile);
             }
 
-            await axios.put(`http://localhost:4444/api/recipes/${id}`, bodyFormData);
+            await client.put(`/api/recipes/${id}`, bodyFormData);
             alert("Recipe updated successfully! ✅");
             navigate(`/recipe/${id}`);
         } catch (err) {

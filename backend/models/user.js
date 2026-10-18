@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
-    avatar: { type: String, default: 'https://via.placeholder.com/150' },
+    avatar: { type: String, default: '' },
     bio: { type: String, maxlength: 200 },
     favoriteCuisines: [{ type: String }],
     hobbies: [{ type: String }],

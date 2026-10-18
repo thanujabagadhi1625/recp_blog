@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
+import client from '../api/client';
 import { AuthContext } from '../context/AuthContext';
 
 const Profile = () => {
@@ -19,7 +19,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:4444/api/users/me');
+        const res = await client.get('/api/users/me');
         setProfile(res.data);
         setForm({
           avatar: res.data.avatar || '',
@@ -54,7 +54,7 @@ const Profile = () => {
         favoriteCuisines: form.favoriteCuisines,
         hobbies: form.hobbies,
       };
-      const res = await axios.put('http://localhost:4444/api/users/me', payload);
+      const res = await client.put('/api/users/me', payload);
       setProfile(res.data);
       const updatedUser = { ...user, ...res.data, id: res.data.id || user.id };
       login(localStorage.getItem('token'), updatedUser);
@@ -80,7 +80,7 @@ const Profile = () => {
       <h1>My Profile</h1>
       <div className="profile-card" style={{ display: 'flex', gap: '30px', alignItems: 'flex-start' }}>
         <div style={{ flex: 1 }}>
-          <img src={profile?.avatar || 'https://via.placeholder.com/200'} alt="Avatar" style={{ width: '200px', borderRadius: '18px' }} />
+          <img src={profile?.avatar || '/placeholder.svg'} alt="Avatar" style={{ width: '200px', borderRadius: '18px' }} />
         </div>
         <div style={{ flex: 2 }}>
           <h2>{profile?.name}</h2>

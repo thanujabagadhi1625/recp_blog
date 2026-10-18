@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" fill="#f0f2f5"/>
+  <g fill="#9aa0a6">
+    <path d="M200 110c-22.1 0-40 17.9-40 40 0 17.5 11.3 32.4 27 37.8V210h26v-22.2c15.7-5.4 27-20.3 27-37.8 0-22.1-17.9-40-40-40zm-14 42h28v10h-28v-10zm28-14h-28v-10h28v10z"/>
+    <circle cx="150" cy="115" r="12"/>
+    <circle cx="250" cy="115" r="12"/>
+    <text x="200" y="240" font-family="system-ui, sans-serif" font-size="16" font-weight="500" fill="#80868b" text-anchor="middle">FoodieVerse</text>
+  </g>
+</svg>

@@ -3,13 +3,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config/env');
 
-const getFullImageUrl = (req, imagePath) => {
-  if (!imagePath) return imagePath;
-  if (imagePath.startsWith('http')) return imagePath;
-  const host = req.get('host');
-  return `${req.protocol}://${host}${imagePath}`;
-};
-
 const userSignup = async (req, res) => {
   try {
     let { name, email, password } = req.body;
@@ -86,7 +79,7 @@ const getUser = async (req, res) => {
     const profile = user.toObject();
     profile.favorites = profile.favorites.map((recipe) => ({
       ...recipe,
-      coverImage: getFullImageUrl(req, recipe.coverImage),
+      coverImage: recipe.coverImage || '',
     }));
     return res.status(200).json(profile);
   } catch (err) {
@@ -144,7 +137,7 @@ const getFavorites = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
     const mapped = user.favorites.map((recipe) => ({
       ...recipe,
-      coverImage: getFullImageUrl(req, recipe.coverImage),
+      coverImage: recipe.coverImage || '',
     }));
     return res.status(200).json(mapped);
   } catch (err) {
@@ -160,7 +153,7 @@ const getMe = async (req, res) => {
     const result = user.toObject();
     result.favorites = result.favorites.map((recipe) => ({
       ...recipe,
-      coverImage: getFullImageUrl(req, recipe.coverImage),
+      coverImage: recipe.coverImage || '',
     }));
     return res.status(200).json(result);
   } catch (err) {

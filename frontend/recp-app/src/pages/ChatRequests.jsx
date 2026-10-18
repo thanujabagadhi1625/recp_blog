@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
+import client from '../api/client';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const ChatRequests = () => {
-  const { user, token } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ const ChatRequests = () => {
     const fetchRequests = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:4444/api/chats/requests', { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
+        const res = await client.get('/api/chats/requests');
         setRequests(res.data);
       } catch (err) {
         console.error('Failed to load chat requests', err);
@@ -26,7 +26,7 @@ const ChatRequests = () => {
       }
     };
     fetchRequests();
-  }, [user, token]);
+  }, [user]);
 
   if (!user) {
     return <h2 style={{ textAlign: 'center', marginTop: '80px' }}>Please log in to view chat requests.</h2>;
@@ -43,7 +43,7 @@ const ChatRequests = () => {
         requests.map((request) => (
           <div key={request._id} style={{ border: '1px solid #ddd', borderRadius: '14px', padding: '18px', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <img src={request.senderId?.avatar || 'https://via.placeholder.com/80'} alt={request.senderId?.name} style={{ width: '80px', borderRadius: '12px' }} />
+              <img src={request.senderId?.avatar || '/placeholder.svg'} alt={request.senderId?.name} style={{ width: '80px', borderRadius: '12px' }} />
               <div>
                 <h3>{request.senderId?.name}</h3>
                 <p>{request.senderId?.bio || 'No bio available'}</p>
@@ -54,7 +54,7 @@ const ChatRequests = () => {
                 <button
                   onClick={async () => {
                     try {
-                      await axios.post(`http://localhost:4444/api/chats/request/${request._id}/respond`, { action: 'accepted' }, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
+                      await client.post(`/api/chats/request/${request._id}/respond`, { action: 'accepted' });
                       navigate(`/chat/${request._id}`);
                     } catch (err) {
                       console.error('Failed to accept', err);
@@ -66,7 +66,7 @@ const ChatRequests = () => {
                 <button
                   onClick={async () => {
                     try {
-                      await axios.post(`http://localhost:4444/api/chats/request/${request._id}/respond`, { action: 'declined' }, { headers: { Authorization: token ? `Bearer ${token}` : undefined } });
+                      await client.post(`/api/chats/request/${request._id}/respond`, { action: 'declined' });
                       setRequests((prev) => prev.filter(r => r._id !== request._id));
                     } catch (err) {
                       console.error('Failed to decline', err);

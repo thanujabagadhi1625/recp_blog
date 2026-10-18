@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import axios from "axios";
+import client from "../api/client";
 import { AuthContext } from "../context/AuthContext";
 import Recpitems from "../components/recpitems";
 import { Link } from "react-router-dom";
@@ -16,9 +16,7 @@ const MyRecipes = () => {
     }
     try {
       setLoading(true);
-      const res = await axios.get(
-        `http://localhost:4444/api/recipes/user/${user.id}`
-      );
+      const res = await client.get(`/api/recipes/user/${user.id}`);
       setRecipes(res.data);
     } catch (err) {
       console.error("Failed to fetch user recipes", err);

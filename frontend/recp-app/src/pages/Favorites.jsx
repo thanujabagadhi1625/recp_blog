@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
-import axios from "axios";
+import client from "../api/client";
 import { AuthContext } from "../context/AuthContext";
 import Recpitems from "../components/recpitems";
 
@@ -15,8 +15,7 @@ const Favorites = () => {
     }
     try {
       setLoading(true);
-      // This endpoint requires auth, which axios default headers provide
-      const res = await axios.get("http://localhost:4444/api/users/me/favorites");
+      const res = await client.get("/api/users/me/favorites");
       setRecipes(res.data);
     } catch (err) {
       console.error("Failed to fetch favorites", err);

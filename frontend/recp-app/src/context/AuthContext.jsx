@@ -1,16 +1,11 @@
-import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { createContext, useState, useEffect, useCallback } from 'react';
+import client from '../api/client';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-      return storedToken;
-    }
-    return null;
+    return localStorage.getItem('token') || null;
   });
 
   const [user, setUser] = useState(() => {
@@ -32,20 +27,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
     setToken(newToken);
     setUser(userData);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-    delete axios.defaults.headers.common['Authorization'];
-  };
+  }, []);
 
   // Auto-logout on 401 responses and cleanup interceptor on unmount
   useEffect(() => {
-    const resInterceptor = axios.interceptors.response.use(
+    const resInterceptor = client.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error && error.response && error.response.status === 401) {
@@ -56,9 +49,9 @@ export const AuthProvider = ({ children }) => {
     );
 
     return () => {
-      axios.interceptors.response.eject(resInterceptor);
+      client.interceptors.response.eject(resInterceptor);
     };
-  }, []);
+  }, [logout]);
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, loading }}>

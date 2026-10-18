@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import axios from "axios";
+import client from "../api/client";
 import { AuthContext } from "../context/AuthContext";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
@@ -20,7 +20,7 @@ function Inputform({ setIsOpen }) {
       const endpoint = isSignup ? "signup" : "login";
       const payload = isSignup ? { name, email, password } : { email, password };
       
-      const res = await axios.post(`http://localhost:4444/api/users/${endpoint}`, payload);
+      const res = await client.post(`/api/users/${endpoint}`, payload);
 
       login(res.data.token, res.data.user);
       setIsOpen(false);
@@ -62,9 +62,14 @@ function Inputform({ setIsOpen }) {
           onChange={(e) => setPassword(e.target.value)}
           style={{ paddingRight: '40px' }}
         />
-        <span onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '10px', top: '38px', cursor: 'pointer' }}>
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          aria-label={showPassword ? "Hide password" : "Show password"}
+          style={{ position: 'absolute', right: '10px', top: '34px', cursor: 'pointer', background: 'none', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center', padding: '4px' }}
+        >
           {showPassword ? <FaEyeSlash /> : <FaEye />}
-        </span>
+        </button>
       </div>
 
       <button type="submit">{isSignup ? "Sign Up" : "Login"}</button>

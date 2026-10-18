@@ -41,8 +41,10 @@ function Navbar() {
               <button onClick={handleLogout} className="logout-btn">Logout</button>
             </li>
           ) : (
-            <li onClick={() => setIsOpen(true)} className="flex items-center gap-2">
-              <FaUserAlt /> Login
+            <li>
+              <button type="button" onClick={() => setIsOpen(true)} className="login-btn">
+                <FaUserAlt /> Login
+              </button>
             </li>
           )}
         </ul>

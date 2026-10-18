@@ -1,7 +1,6 @@
-// src/pages/RecipeDetail.jsx
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import client from "../api/client";
 import { AuthContext } from "../context/AuthContext";
 import { FaClock, FaUserFriends, FaGlobe, FaHeart, FaEdit, FaTrash } from "react-icons/fa";
 
@@ -22,7 +21,7 @@ const RecipeDetail = () => {
         const fetchRecipe = async () => {
             try {
                 setLoading(true);
-                const res = await axios.get(`http://localhost:4444/api/recipes/${id}`);
+                const res = await client.get(`/api/recipes/${id}`);
                 setRecipe(res.data);
                 setError("");
             } catch (err) {
@@ -35,7 +34,7 @@ const RecipeDetail = () => {
 
         const fetchComments = async () => {
             try {
-                const res = await axios.get(`http://localhost:4444/api/comments/recipe/${id}`);
+                const res = await client.get(`/api/comments/recipe/${id}`);
                 setComments(res.data);
             } catch (err) {
                 console.error('Failed to load comments', err);
@@ -49,7 +48,7 @@ const RecipeDetail = () => {
     const handleDelete = async () => {
         if (window.confirm("Are you sure you want to delete this recipe?")) {
             try {
-                await axios.delete(`http://localhost:4444/api/recipes/${id}`);
+                await client.delete(`/api/recipes/${id}`);
                 alert("Recipe deleted successfully!");
                 navigate("/my-recipes");
             } catch {
@@ -69,8 +68,8 @@ const RecipeDetail = () => {
         }
 
         try {
-            await axios.post(`http://localhost:4444/api/recipes/${id}/like`);
-            const res = await axios.get(`http://localhost:4444/api/recipes/${id}`);
+            await client.post(`/api/recipes/${id}/like`);
+            const res = await client.get(`/api/recipes/${id}`);
             setRecipe(res.data);
         } catch (err) {
             console.error('Failed to like recipe', err);
@@ -84,8 +83,8 @@ const RecipeDetail = () => {
         }
 
         try {
-            await axios.post(`http://localhost:4444/api/recipes/${id}/dislike`);
-            const res = await axios.get(`http://localhost:4444/api/recipes/${id}`);
+            await client.post(`/api/recipes/${id}/dislike`);
+            const res = await client.get(`/api/recipes/${id}`);
             setRecipe(res.data);
         } catch (err) {
             console.error('Failed to dislike recipe', err);
@@ -106,11 +105,11 @@ const RecipeDetail = () => {
         }
         try {
             if (isFavorite) {
-                const res = await axios.delete(`http://localhost:4444/api/users/favorites/${recipe._id}`);
+                const res = await client.delete(`/api/users/favorites/${recipe._id}`);
                 login(localStorage.getItem('token'), { ...user, favorites: res.data.favorites });
                 alert('Removed from favorites');
             } else {
-                const res = await axios.post(`http://localhost:4444/api/users/favorites/${recipe._id}`);
+                const res = await client.post(`/api/users/favorites/${recipe._id}`);
                 login(localStorage.getItem('token'), { ...user, favorites: res.data.favorites });
                 alert('Added to favorites');
             }
@@ -136,11 +135,11 @@ const RecipeDetail = () => {
                 text: replyTo ? replyText.trim() : newComment.trim(),
                 parentId: replyTo || undefined,
             };
-            await axios.post(`http://localhost:4444/api/comments/recipe/${id}`, payload);
+            await client.post(`/api/comments/recipe/${id}`, payload);
             setNewComment('');
             setReplyTo(null);
             setReplyText('');
-            const res = await axios.get(`http://localhost:4444/api/comments/recipe/${id}`);
+            const res = await client.get(`/api/comments/recipe/${id}`);
             setComments(res.data);
         } catch (err) {
             console.error('Failed to submit comment', err);
@@ -165,7 +164,7 @@ const RecipeDetail = () => {
 
             <div className="recipe-stats">
                 <div className="stat-item">
-                    <img src={recipe.userId?.avatar || "https://via.placeholder.com/150"} alt={recipe.author} style={{ width: "40px", height: "40px", borderRadius: "50%" }}/>
+                    <img src={recipe.userId?.avatar || "/placeholder.svg"} alt={recipe.author} style={{ width: "40px", height: "40px", borderRadius: "50%" }}/>
                     <strong>{recipe.author || recipe.userId?.name}</strong>
                 </div>
                 <div className="stat-item"><FaClock /> {recipe.prepTime} min (Prep)</div>
@@ -199,7 +198,7 @@ const RecipeDetail = () => {
             )}
 
             <main className="recipe-detail-main">
-                <img src={recipe.coverImage || "https://via.placeholder.com/900x500?text=Recipe"} alt={recipe.title} />
+                <img src={recipe.coverImage || "/placeholder.svg"} alt={recipe.title} />
                 <div className="recipe-content-grid">
                     <section className="ingredients-section">
                         <h2>Ingredients</h2>
