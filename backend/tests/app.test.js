@@ -197,6 +197,36 @@ describe('Backend Test Suite', () => {
         });
       expect(dupRes.status).toBe(409);
     });
+
+    it('registers two users with different emails and the same name; email login works, name login fails', async () => {
+      const signup1 = await request(app)
+        .post('/api/users/signup')
+        .send({ name: 'Sam Smith', email: 'sam1@example.com', password: 'password123' });
+      expect(signup1.status).toBe(201);
+
+      const signup2 = await request(app)
+        .post('/api/users/signup')
+        .send({ name: 'Sam Smith', email: 'sam2@example.com', password: 'password123' });
+      expect(signup2.status).toBe(201);
+
+      const login1 = await request(app)
+        .post('/api/users/login')
+        .send({ email: 'sam1@example.com', password: 'password123' });
+      expect(login1.status).toBe(200);
+      expect(login1.body.user.email).toBe('sam1@example.com');
+
+      const login2 = await request(app)
+        .post('/api/users/login')
+        .send({ email: 'sam2@example.com', password: 'password123' });
+      expect(login2.status).toBe(200);
+      expect(login2.body.user.email).toBe('sam2@example.com');
+
+      const loginByName = await request(app)
+        .post('/api/users/login')
+        .send({ email: 'Sam Smith', password: 'password123' });
+      expect(loginByName.status).toBeGreaterThanOrEqual(400);
+      expect(loginByName.status).toBeLessThan(500);
+    });
   });
 
   describe('Recipe Authorization and Edit Whitelist', () => {
@@ -253,7 +283,7 @@ describe('Backend Test Suite', () => {
       expect(res.body.message).toMatch(/not authorized/i);
     });
 
-    it('enforces whitelist on edit and does not allow modifying userId, likes, or author', async () => {
+    it('editRecipe rejects attempts to set userId, likes, viewCount, author', async () => {
       const fakeUserId = new mongoose.Types.ObjectId();
       const res = await request(app)
         .put(`/api/recipes/${recipe._id}`)
@@ -264,6 +294,7 @@ describe('Backend Test Suite', () => {
           userId: fakeUserId.toString(),
           author: 'Malicious Author',
           likes: [fakeUserId.toString()],
+          viewCount: 9999,
         });
 
       expect(res.status).toBe(200);
@@ -273,6 +304,133 @@ describe('Backend Test Suite', () => {
       expect(updated.userId.toString()).toBe(userAId.toString());
       expect(updated.author).toBe('User A');
       expect(updated.likes).toHaveLength(0);
+      expect(updated.viewCount).toBe(0);
+    });
+  });
+
+  describe('User Profile and Favorites', () => {
+    it('getMe returns 200 and populated favorites for a user who has at least one favorite', async () => {
+      const userRes = await request(app)
+        .post('/api/users/signup')
+        .send({ name: 'Fav User', email: 'favuser@example.com', password: 'password123' });
+      const userToken = userRes.body.token;
+      const userId = userRes.body.user.id;
+
+      const recipe = await Recipe.create({
+        title: 'Delicious Pasta',
+        description: 'Cheesy and warm',
+        ingredients: 'Pasta, Cheese',
+        instructions: 'Boil pasta, add cheese',
+        category: 'Dinner',
+        cuisine: 'Italian',
+        difficulty: 'Easy',
+        author: 'Fav User',
+        userId,
+        coverImage: 'https://example.com/pasta.jpg',
+      });
+
+      const addFavRes = await request(app)
+        .post(`/api/users/favorites/${recipe._id}`)
+        .set('Authorization', `Bearer ${userToken}`);
+      expect(addFavRes.status).toBe(200);
+
+      const meRes = await request(app)
+        .get('/api/users/me')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(meRes.status).toBe(200);
+      expect(Array.isArray(meRes.body.favorites)).toBe(true);
+      expect(meRes.body.favorites.length).toBe(1);
+      expect(meRes.body.favorites[0]).toMatchObject({
+        title: 'Delicious Pasta',
+      });
+      expect(meRes.body.favorites[0]).toHaveProperty('coverImage');
+    });
+
+    it('updateProfile response contains id (not _id)', async () => {
+      const userRes = await request(app)
+        .post('/api/users/signup')
+        .send({ name: 'Profile User', email: 'profileuser@example.com', password: 'password123' });
+      const userToken = userRes.body.token;
+      const userId = userRes.body.user.id;
+
+      const updateRes = await request(app)
+        .put('/api/users/me')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          bio: 'Food enthusiast and amateur chef',
+          favoriteCuisines: ['Italian', 'Mexican'],
+        });
+
+      expect(updateRes.status).toBe(200);
+      expect(updateRes.body).toHaveProperty('id');
+      expect(updateRes.body.id.toString()).toBe(userId.toString());
+      expect(updateRes.body._id).toBeUndefined();
+    });
+  });
+
+  describe('Chat Request Lifecycle', () => {
+    let senderToken;
+    let senderId;
+    let receiverToken;
+    let receiverId;
+
+    beforeEach(async () => {
+      const resSender = await request(app)
+        .post('/api/users/signup')
+        .send({ name: 'Sender User', email: 'chatsender@example.com', password: 'password123' });
+      senderToken = resSender.body.token;
+      senderId = resSender.body.user.id;
+
+      const resReceiver = await request(app)
+        .post('/api/users/signup')
+        .send({ name: 'Receiver User', email: 'chatreceiver@example.com', password: 'password123' });
+      receiverToken = resReceiver.body.token;
+      receiverId = resReceiver.body.user.id;
+    });
+
+    it('returns 409 when responding to a chat request that is not pending', async () => {
+      const chatReq = await ChatRequest.create({
+        senderId,
+        receiverId,
+        status: 'accepted',
+      });
+
+      const res = await request(app)
+        .post(`/api/chats/request/${chatReq._id}/respond`)
+        .set('Authorization', `Bearer ${receiverToken}`)
+        .send({ action: 'declined' });
+
+      expect(res.status).toBe(409);
+      expect(res.body.message).toMatch(/only respond to pending|cannot respond/i);
+    });
+
+    it('allows a declined request to be re-sent, resulting in pending status', async () => {
+      const sendRes = await request(app)
+        .post(`/api/chats/request/${receiverId}`)
+        .set('Authorization', `Bearer ${senderToken}`);
+      expect(sendRes.status).toBe(201);
+      const requestId = sendRes.body._id;
+
+      const declineRes = await request(app)
+        .post(`/api/chats/request/${requestId}/respond`)
+        .set('Authorization', `Bearer ${receiverToken}`)
+        .send({ action: 'declined' });
+      expect(declineRes.status).toBe(200);
+
+      const resendRes = await request(app)
+        .post(`/api/chats/request/${receiverId}`)
+        .set('Authorization', `Bearer ${senderToken}`);
+      expect(resendRes.status).toBe(200);
+      expect(resendRes.body.status).toBe('pending');
+
+      const count = await ChatRequest.countDocuments({
+        $or: [
+          { senderId, receiverId },
+          { senderId: receiverId, receiverId: senderId },
+        ],
+      });
+      expect(count).toBe(1);
     });
   });
 
@@ -392,6 +550,8 @@ describe('Backend Test Suite', () => {
     let tokenUserA;
     let tokenUserB;
     let tokenUserC;
+    let userAId;
+    let userBId;
     let chatRequest;
 
     beforeEach(async () => {
@@ -399,11 +559,13 @@ describe('Backend Test Suite', () => {
         .post('/api/users/signup')
         .send({ name: 'Socket A', email: 'socket_a@example.com', password: 'password123' });
       tokenUserA = resA.body.token;
+      userAId = resA.body.user.id;
 
       const resB = await request(app)
         .post('/api/users/signup')
         .send({ name: 'Socket B', email: 'socket_b@example.com', password: 'password123' });
       tokenUserB = resB.body.token;
+      userBId = resB.body.user.id;
 
       const resC = await request(app)
         .post('/api/users/signup')
@@ -411,8 +573,8 @@ describe('Backend Test Suite', () => {
       tokenUserC = resC.body.token;
 
       chatRequest = await ChatRequest.create({
-        senderId: resA.body.user.id,
-        receiverId: resB.body.user.id,
+        senderId: userAId,
+        receiverId: userBId,
         status: 'accepted',
       });
     });
@@ -465,6 +627,39 @@ describe('Backend Test Suite', () => {
             }, 100);
           });
         }, 100);
+      });
+    });
+
+    it('rejects socket join for participant of a pending request', async () => {
+      const resPending = await request(app)
+        .post('/api/users/signup')
+        .send({ name: 'Pending Partner', email: 'pendingpartner@example.com', password: 'password123' });
+      const pendingPartnerId = resPending.body.user.id;
+
+      const pendingReq = await ChatRequest.create({
+        senderId: userAId,
+        receiverId: pendingPartnerId,
+        status: 'pending',
+      });
+
+      await new Promise((resolve) => {
+        const client = ioClient(`http://localhost:${serverPort}`, {
+          transports: ['websocket'],
+          auth: { token: tokenUserA },
+          reconnection: false,
+        });
+
+        client.on('connect', () => {
+          client.emit('join', pendingReq._id.toString());
+
+          setTimeout(() => {
+            const roomSockets = io.sockets.adapter.rooms.get(pendingReq._id.toString());
+            const isInRoom = roomSockets ? roomSockets.has(client.id) : false;
+            expect(isInRoom).toBe(false);
+            client.close();
+            resolve();
+          }, 100);
+        });
       });
     });
   });
