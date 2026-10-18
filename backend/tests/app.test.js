@@ -63,6 +63,29 @@ describe('Backend Test Suite', () => {
     });
   });
 
+  describe('Upload Ordering', () => {
+    it('returns 404 for comment on nonexistent recipe without invoking Cloudinary upload', async () => {
+      const cloudinary = require('cloudinary').v2;
+      const uploadSpy = jest.spyOn(cloudinary.uploader, 'upload_stream');
+
+      const userRes = await request(app)
+        .post('/api/users/signup')
+        .send({ name: 'Upload Tester', email: 'uploadorder@example.com', password: 'password123' });
+      const userToken = userRes.body.token;
+
+      const nonExistentRecipeId = new mongoose.Types.ObjectId();
+      const res = await request(app)
+        .post(`/api/comments/recipe/${nonExistentRecipeId}`)
+        .set('Authorization', `Bearer ${userToken}`)
+        .field('text', 'Test comment on nonexistent recipe')
+        .attach('attachment', Buffer.from('fake image content'), 'test.png');
+
+      expect(res.status).toBe(404);
+      expect(uploadSpy).not.toHaveBeenCalled();
+      uploadSpy.mockRestore();
+    });
+  });
+
   describe('Rate Limiting', () => {
     it('returns 429 on the 4th login attempt when auth limit is configured to 3', async () => {
       const { createApp } = require('../server');
