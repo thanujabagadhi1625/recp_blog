@@ -53,23 +53,26 @@ function Inputform({ setIsOpen }) {
         />
       </div>
 
-      <div className="form-control" style={{ position: 'relative' }}>
-        <label>Password</label>
-        <input
-          type={showPassword ? 'text' : 'password'}
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ paddingRight: '40px' }}
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          aria-label={showPassword ? "Hide password" : "Show password"}
-          style={{ position: 'absolute', right: '10px', top: '34px', cursor: 'pointer', background: 'none', border: 'none', color: 'inherit', display: 'flex', alignItems: 'center', padding: '4px' }}
-        >
-          {showPassword ? <FaEyeSlash /> : <FaEye />}
-        </button>
+      <div className="form-control">
+        <label htmlFor="password-field">Password</label>
+        <div className="password-input-wrapper">
+          <input
+            id="password-field"
+            type={showPassword ? 'text' : 'password'}
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            className="password-toggle-btn"
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
       </div>
 
       <button type="submit">{isSignup ? "Sign Up" : "Login"}</button>

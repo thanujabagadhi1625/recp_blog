@@ -303,6 +303,47 @@ header ul li a:hover, header ul li:hover {
   transition: background-color 0.2s ease;
 }
 
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 44px;
+  box-sizing: border-box;
+}
+
+.form button.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent !important;
+  color: inherit !important;
+  border: none !important;
+  border-radius: 4px;
+  padding: 6px !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: auto !important;
+  min-width: unset !important;
+  height: auto !important;
+  font-size: 1.1rem;
+  z-index: 2;
+  box-shadow: none !important;
+}
+
+.form button.password-toggle-btn:hover {
+  background: transparent !important;
+  opacity: 0.8;
+}
+
 .form button:hover {
   background: var(--primary-hover);
 }
