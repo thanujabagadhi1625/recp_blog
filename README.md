@@ -200,6 +200,20 @@ The test suite covers:
 - Email privacy protection on all public endpoints (`/api/recipes`, `/api/recipes/:id`, `/api/users/:id`, `/api/users/search`)
 - Socket.IO connection authentication and unauthorized room join rejection
 
+To run the frontend test suite (Vitest + React Testing Library + jsdom):
+
+```bash
+cd frontend/recp-app
+npm test
+```
+
+The frontend regression test suite verifies:
+- Reload resilience (synchronous auth hydration, authorization headers on initial network requests, render gating while loading)
+- User identity preservation on profile update (retaining `user.id`, avoiding `/undefined` in recipes navigation)
+- Password input visibility toggle without losing typing focus
+- Independence between like button (`/api/recipes/:id/like`) and favorite bookmark button (`/api/users/favorites/:id`)
+- Responsive navbar navigation and hamburger menu `aria-expanded` toggle
+
 To run frontend linting and production build verification:
 
 ```bash
