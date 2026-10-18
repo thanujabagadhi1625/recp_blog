@@ -84,6 +84,32 @@ describe('Backend Test Suite', () => {
       expect(uploadSpy).not.toHaveBeenCalled();
       uploadSpy.mockRestore();
     });
+
+    it('returns 400 and does not call cloudinary when MP4 bytes are sent as image/png with .png name to recipe cover route', async () => {
+      const cloudinary = require('cloudinary').v2;
+      const uploadSpy = jest.spyOn(cloudinary.uploader, 'upload_stream');
+
+      const userRes = await request(app)
+        .post('/api/users/signup')
+        .send({ name: 'Cover Tester', email: 'covertester@example.com', password: 'password123' });
+      const userToken = userRes.body.token;
+
+      const mp4Buffer = Buffer.from([
+        0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d, 0x00, 0x00, 0x00, 0x00, 0x69, 0x73, 0x6f, 0x6d, 0x6d, 0x70, 0x34, 0x32
+      ]);
+
+      const res = await request(app)
+        .post('/api/recipes')
+        .set('Authorization', `Bearer ${userToken}`)
+        .field('title', 'Recipe with Fake Image')
+        .field('description', 'Test description')
+        .attach('coverImage', mp4Buffer, { filename: 'cover.png', contentType: 'image/png' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.message).toMatch(/file type mismatch/i);
+      expect(uploadSpy).not.toHaveBeenCalled();
+      uploadSpy.mockRestore();
+    });
   });
 
   describe('Rate Limiting', () => {

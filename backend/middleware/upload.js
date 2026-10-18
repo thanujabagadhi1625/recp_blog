@@ -63,8 +63,8 @@ const uploadToCloudinary = async (req, res, next) => {
     const { fileTypeFromBuffer } = await import('file-type');
     const detected = await fileTypeFromBuffer(req.file.buffer);
 
-    if (!detected || !ATTACHMENT_MIME_TO_EXT[detected.mime]) {
-      return res.status(400).json({ message: 'Invalid file content: file type mismatch' });
+    if (!detected || !ATTACHMENT_MIME_TO_EXT[detected.mime] || detected.mime !== req.file.mimetype) {
+      return res.status(400).json({ message: 'file type mismatch' });
     }
 
     const fileType = detected.mime.startsWith('image') ? 'image' : 'video';
