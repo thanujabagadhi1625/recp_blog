@@ -124,9 +124,9 @@ const addRecipe = async (req, res) => {
             description,
             ingredients,
             instructions,
-            prepTime,
-            cookTime,
-            servings,
+            prepTime: prepTime || undefined,
+            cookTime: cookTime || undefined,
+            servings: servings || undefined,
             tags: parsedTags,
             category: category || undefined,
             cuisine: cuisine || undefined,
@@ -181,6 +181,9 @@ const editRecipe = async (req, res) => {
         const updateFields = {};
         for (const field of allowedFields) {
             if (req.body[field] !== undefined) {
+                if (['prepTime', 'cookTime', 'servings'].includes(field) && req.body[field] === '') {
+                    continue;
+                }
                 updateFields[field] = req.body[field];
             }
         }

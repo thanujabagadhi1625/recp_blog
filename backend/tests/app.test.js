@@ -379,6 +379,42 @@ describe('Backend Test Suite', () => {
       expect(updated.likes).toHaveLength(0);
       expect(updated.viewCount).toBe(0);
     });
+
+    it('creates a recipe with prepTime "" and returns 201', async () => {
+      const cloudinary = require('cloudinary').v2;
+      const uploadSpy = jest.spyOn(cloudinary.uploader, 'upload_stream').mockImplementation((options, cb) => {
+        return {
+          end: () => {
+            cb(null, {
+              secure_url: 'https://cloudinary.com/fake-cover.png',
+              public_id: 'fake-cover-id',
+            });
+          },
+        };
+      });
+
+      const pngBuffer = Buffer.from(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+        'base64'
+      );
+
+      const res = await request(app)
+        .post('/api/recipes')
+        .set('Authorization', `Bearer ${tokenUserA}`)
+        .field('title', 'Blank PrepTime Recipe')
+        .field('description', 'Delicious blank prep time recipe')
+        .field('ingredients', 'Sugar, Spice')
+        .field('instructions', 'Mix together')
+        .field('prepTime', '')
+        .attach('coverImage', pngBuffer, { filename: 'cover.png', contentType: 'image/png' });
+
+      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty('_id');
+      expect(res.body.title).toBe('Blank PrepTime Recipe');
+      expect(res.body.prepTime).toBe(0);
+
+      uploadSpy.mockRestore();
+    });
   });
 
   describe('User Profile and Favorites', () => {

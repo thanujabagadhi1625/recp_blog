@@ -55,17 +55,17 @@ const validateRecipeCreate = [
     .isLength({ max: 500 })
     .withMessage('Description cannot exceed 500 characters'),
   body('prepTime')
-    .optional()
+    .optional({ values: 'falsy' })
     .toInt()
     .isInt({ min: 0, max: 1440 })
     .withMessage('Prep time must be between 0 and 1440 minutes'),
   body('cookTime')
-    .optional()
+    .optional({ values: 'falsy' })
     .toInt()
     .isInt({ min: 0, max: 1440 })
     .withMessage('Cook time must be between 0 and 1440 minutes'),
   body('servings')
-    .optional()
+    .optional({ values: 'falsy' })
     .toInt()
     .isInt({ min: 1, max: 500 })
     .withMessage('Servings must be between 1 and 500'),
@@ -96,17 +96,17 @@ const validateRecipeEdit = [
     .isLength({ max: 500 })
     .withMessage('Description cannot exceed 500 characters'),
   body('prepTime')
-    .optional()
+    .optional({ values: 'falsy' })
     .toInt()
     .isInt({ min: 0, max: 1440 })
     .withMessage('Prep time must be between 0 and 1440 minutes'),
   body('cookTime')
-    .optional()
+    .optional({ values: 'falsy' })
     .toInt()
     .isInt({ min: 0, max: 1440 })
     .withMessage('Cook time must be between 0 and 1440 minutes'),
   body('servings')
-    .optional()
+    .optional({ values: 'falsy' })
     .toInt()
     .isInt({ min: 1, max: 500 })
     .withMessage('Servings must be between 1 and 500'),
