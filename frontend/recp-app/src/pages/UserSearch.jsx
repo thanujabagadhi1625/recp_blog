@@ -37,7 +37,7 @@ const UserSearch = () => {
           <p>No users found yet.</p>
         ) : (
           users.map((user) => (
-            <div key={user._id} style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '14px', marginBottom: '12px' }}>
+            <div key={user._id} style={{ border: '1px solid var(--border)', background: 'var(--surface)', padding: '16px', borderRadius: '14px', marginBottom: '12px' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                 <img src={user.avatar || '/placeholder.svg'} alt={user.name} style={{ width: '80px', borderRadius: '12px' }} />
                 <div>
@@ -57,9 +57,9 @@ const UserSearch = () => {
                         alert(err.response?.data?.message || 'Failed to send chat request');
                       }
                     }}
-                    style={{ padding: '10px 14px', background: '#4caf50', color: 'white', border: 'none', borderRadius: '8px' }}
+                    style={{ padding: '10px 14px', background: 'var(--success)', color: 'var(--white)', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
                   >Send Chat Request</button>
-                  <Link to={`/chat/requests`} style={{ color: '#667eea', alignSelf: 'center', textDecoration: 'none' }}>Requests</Link>
+                  <Link to={`/chat/requests`} style={{ color: 'var(--accent)', alignSelf: 'center', textDecoration: 'none' }}>Requests</Link>
                 </div>
               </div>
             </div>

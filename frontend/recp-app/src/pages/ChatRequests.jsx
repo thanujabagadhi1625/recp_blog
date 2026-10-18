@@ -41,7 +41,7 @@ const ChatRequests = () => {
         <p>No chat requests at the moment.</p>
       ) : (
         requests.map((request) => (
-          <div key={request._id} style={{ border: '1px solid #ddd', borderRadius: '14px', padding: '18px', marginBottom: '16px' }}>
+          <div key={request._id} style={{ border: '1px solid var(--border)', background: 'var(--surface)', borderRadius: '14px', padding: '18px', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <img src={request.senderId?.avatar || '/placeholder.svg'} alt={request.senderId?.name} style={{ width: '80px', borderRadius: '12px' }} />
               <div>
@@ -61,7 +61,7 @@ const ChatRequests = () => {
                       alert(err.response?.data?.message || 'Failed to accept');
                     }
                   }}
-                  style={{ padding: '10px 14px', background: '#4caf50', color: 'white', border: 'none', borderRadius: '8px' }}
+                  style={{ padding: '10px 14px', background: 'var(--success)', color: 'var(--white)', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
                 >Accept</button>
                 <button
                   onClick={async () => {
@@ -73,7 +73,7 @@ const ChatRequests = () => {
                       alert(err.response?.data?.message || 'Failed to decline');
                     }
                   }}
-                  style={{ padding: '10px 14px', background: '#e74c3c', color: 'white', border: 'none', borderRadius: '8px' }}
+                  style={{ padding: '10px 14px', background: 'var(--danger)', color: 'var(--white)', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
                 >Decline</button>
               </div>
             </div>

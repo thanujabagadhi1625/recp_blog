@@ -93,7 +93,7 @@ const ChatRoom = () => {
   return (
     <div style={{ padding: '40px 20px', maxWidth: '900px', margin: '0 auto' }}>
       <h1>Chat Room</h1>
-      <div style={{ border: '1px solid #ddd', borderRadius: '14px', padding: '20px', minHeight: '300px' }}>
+      <div style={{ border: '1px solid var(--border)', background: 'var(--surface)', borderRadius: '14px', padding: '20px', minHeight: '300px' }}>
         {messages.length === 0 ? (
           <p>No messages yet.</p>
         ) : (
@@ -104,7 +104,7 @@ const ChatRoom = () => {
             return (
             <div key={message._id} style={{ marginBottom: '18px' }}>
               <div style={{ display: 'flex', justifyContent: isOwn ? 'flex-end' : 'flex-start' }}>
-                <div style={{ maxWidth: '70%', background: isOwn ? '#d2f8d2' : '#f4f4f4', padding: '12px 16px', borderRadius: '14px' }}>
+                <div style={{ maxWidth: '70%', background: isOwn ? 'var(--primary)' : 'var(--surface-2)', color: isOwn ? 'var(--white)' : 'var(--text)', padding: '12px 16px', borderRadius: '14px' }}>
                   {message.text && <p style={{ margin: 0 }}>{message.text}</p>}
                   {message.attachmentUrl && (
                     (message.attachmentUrl.startsWith('http') || message.attachmentUrl.startsWith('data:')) ? (
@@ -121,7 +121,7 @@ const ChatRoom = () => {
                       )
                     )
                   )}
-                  <small style={{ display: 'block', marginTop: '8px', color: '#555' }}>{new Date(message.createdAt).toLocaleString()}</small>
+                  <small style={{ display: 'block', marginTop: '8px', color: isOwn ? 'var(--white)' : 'var(--text-muted)', opacity: 0.8 }}>{new Date(message.createdAt).toLocaleString()}</small>
                 </div>
               </div>
             </div>

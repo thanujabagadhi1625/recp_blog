@@ -179,9 +179,9 @@ const RecipeDetail = () => {
                     style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
                     {recipe.likes?.includes(user?.id) ? (
-                        <FaHeart style={{ color: 'red' }} />
+                        <FaHeart style={{ color: 'var(--accent)' }} />
                     ) : (
-                        <FaRegHeart style={{ color: '#888' }} />
+                        <FaRegHeart style={{ color: 'var(--text-muted)' }} />
                     )}
                     <span>{recipe.likes?.length || 0}</span>
                 </button>
@@ -193,9 +193,9 @@ const RecipeDetail = () => {
                     style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
                     {isFavorite ? (
-                        <FaBookmark style={{ color: '#e63950' }} />
+                        <FaBookmark style={{ color: 'var(--accent)' }} />
                     ) : (
-                        <FaRegBookmark style={{ color: '#888' }} />
+                        <FaRegBookmark style={{ color: 'var(--text-muted)' }} />
                     )}
                 </button>
                 <button
@@ -205,7 +205,7 @@ const RecipeDetail = () => {
                     aria-label={recipe.dislikes?.includes(user?.id) ? "Remove dislike" : "Dislike recipe"}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                 >
-                    <FaHeart style={{ transform: 'rotate(180deg)', color: recipe.dislikes?.includes(user?.id) ? 'blue' : '#888' }} />
+                    <FaHeart style={{ transform: 'rotate(180deg)', color: recipe.dislikes?.includes(user?.id) ? 'var(--accent)' : 'var(--text-muted)' }} />
                     <span>{recipe.dislikes?.length || 0}</span>
                 </button>
             </div>
@@ -287,7 +287,7 @@ const RecipeDetail = () => {
                             {comment.children?.length > 0 && (
                                 <div style={{ marginLeft: '20px', marginTop: '12px' }}>
                                     {comment.children.map((reply) => (
-                                        <div key={reply._id} className="comment-card" style={{ background: '#f8f8f8', marginTop: '10px' }}>
+                                        <div key={reply._id} className="comment-card" style={{ background: 'var(--surface-2)', marginTop: '10px' }}>
                                             <div className="comment-author">
                                                 <strong>{reply.author}</strong>
                                                 <span>{new Date(reply.createdAt).toLocaleString()}</span>

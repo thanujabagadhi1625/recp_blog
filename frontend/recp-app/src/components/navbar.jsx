@@ -1,19 +1,41 @@
-// src/components/Navbar.jsx
-import React, { useState, useContext } from "react";
+// src/components/navbar.jsx
+import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Modal from "./modal";
 import Inputform from "./inputform";
 import { AuthContext } from "../context/AuthContext";
-import { FaUserAlt } from "react-icons/fa";
+import { FaUserAlt, FaSun, FaMoon } from "react-icons/fa";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    try {
+      return localStorage.getItem("theme") || "dark";
+    } catch {
+      return "dark";
+    }
+  });
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    try {
+      localStorage.setItem("theme", nextTheme);
+    } catch {
+      // ignore
+    }
+    document.documentElement.dataset.theme = nextTheme;
+  };
+
   const handleLogout = () => {
     logout();
-    navigate("/"); // Redirect to home page after logout
+    navigate("/");
   };
 
   return (
@@ -34,6 +56,17 @@ function Navbar() {
               <li><Link to="/add-recipe">Add Recipe</Link></li>
             </>
           )}
+
+          <li>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="theme-toggle-btn"
+              aria-label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
+            >
+              {theme === "light" ? <FaMoon /> : <FaSun />}
+            </button>
+          </li>
           
           {user ? (
             <li className="user-menu">

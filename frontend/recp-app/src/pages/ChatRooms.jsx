@@ -39,7 +39,7 @@ const ChatRooms = () => {
       ) : (
         <div style={{ display: 'grid', gap: '12px' }}>
           {rooms.map(r => (
-            <Link key={r.chatRequestId} to={`/chat/${r.chatRequestId}`} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px', border: '1px solid #ddd', borderRadius: '10px', textDecoration: 'none', color: 'inherit' }}>
+            <Link key={r.chatRequestId} to={`/chat/${r.chatRequestId}`} style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '10px', border: '1px solid var(--border)', background: 'var(--surface)', borderRadius: '10px', textDecoration: 'none', color: 'inherit' }}>
               <img src={r.otherUser?.avatar || '/placeholder.svg'} alt={r.otherUser?.name || 'User'} style={{ width: '64px', height: '64px', borderRadius: '12px' }} />
               <div>
                 <h3 style={{ margin: 0 }}>{r.otherUser?.name || 'Unknown'}</h3>

@@ -77,9 +77,9 @@ function Inputform({ setIsOpen }) {
 
       <button type="submit">{isSignup ? "Sign Up" : "Login"}</button>
 
-      {error && <p className="error" style={{color: 'red', textAlign: 'center'}}>{error}</p>}
+      {error && <p className="error" style={{color: 'var(--danger)', textAlign: 'center'}}>{error}</p>}
 
-      <p onClick={() => setIsSignup(!isSignup)} style={{cursor: 'pointer', textAlign: 'center', marginTop: '10px', color: '#007bff'}}>
+      <p onClick={() => setIsSignup(!isSignup)} style={{cursor: 'pointer', textAlign: 'center', marginTop: '10px', color: 'var(--accent)'}}>
         {isSignup ? "Already have an account? Login" : "Create New Account"}
       </p>
     </form>

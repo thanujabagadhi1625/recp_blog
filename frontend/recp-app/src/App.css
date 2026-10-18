@@ -1,16 +1,14 @@
-/* src/index.css */
+/* src/App.css */
 
-/* --- 1. Global Styles & Variables --- */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
+/* --- 1. Global Styles & Theme Variables --- */
 :root {
-  --primary-color: #6a5acd; /* A nice, modern purple */
-  --primary-hover: #5a4ab9;
-  --secondary-color: #f0f2f5;
-  --text-dark: #333;
-  --text-light: #666;
-  --border-color: #e0e0e0;
-  --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  --primary-color: var(--primary);
+  --primary-hover: var(--primary-hover);
+  --secondary-color: var(--surface-2);
+  --text-dark: var(--text);
+  --text-light: var(--text-muted);
+  --border-color: var(--border);
+  --card-shadow: 0 4px 15px var(--shadow);
   --font-family: 'Poppins', sans-serif;
 }
 
@@ -22,8 +20,8 @@
 
 body {
   font-family: var(--font-family);
-  background-color: #fff;
-  color: var(--text-dark);
+  background-color: var(--bg);
+  color: var(--text);
   line-height: 1.6;
 }
 
@@ -32,6 +30,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--text);
 }
 
 main {
@@ -51,16 +51,18 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 10px var(--shadow);
   position: sticky;
   top: 0;
   z-index: 100;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 header h2 {
   font-weight: 700;
-  color: var(--primary-color);
+  color: var(--accent);
 }
 
 header ul {
@@ -78,11 +80,32 @@ header ul li {
 
 header ul li a, header ul li {
   text-decoration: none;
-  color: var(--text-dark);
+  color: var(--text);
 }
 
 header ul li a:hover, header ul li:hover {
-  color: var(--primary-color);
+  color: var(--accent);
+}
+
+.theme-toggle-btn {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.05rem;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--primary);
+  color: var(--white);
+  border-color: var(--primary);
 }
 
 .login-btn {
@@ -98,12 +121,12 @@ header ul li a:hover, header ul li:hover {
 }
 
 .login-btn:hover {
-  color: var(--primary-color);
+  color: var(--accent);
 }
 
 .logout-btn {
-  background: var(--primary-color);
-  color: #fff;
+  background: var(--primary);
+  color: var(--white);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -117,9 +140,9 @@ header ul li a:hover, header ul li:hover {
 }
 
 .user-menu {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .pagination {
@@ -131,8 +154,8 @@ header ul li a:hover, header ul li:hover {
 }
 
 .pagination button {
-  background: var(--primary-color);
-  color: #fff;
+  background: var(--primary);
+  color: var(--white);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -148,14 +171,17 @@ header ul li a:hover, header ul li:hover {
 .pagination button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: var(--border);
+  color: var(--text-muted);
 }
 
 /* Footer */
 .footer {
   text-align: center;
   padding: 1.5rem;
-  background-color: var(--text-dark);
-  color: #fff;
+  background-color: var(--surface);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
   margin-top: auto;
 }
 
@@ -168,20 +194,22 @@ header ul li a:hover, header ul li:hover {
 }
 
 .recipe-card {
-  background: #fff;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: var(--card-shadow);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   text-decoration: none;
-  color: inherit;
+  color: var(--text);
 }
 
 .recipe-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--accent);
 }
 
 .recipe-card img {
@@ -200,12 +228,12 @@ header ul li a:hover, header ul li:hover {
 .recipe-card-content h3 {
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
-  color: var(--text-dark);
+  color: var(--text);
 }
 
 .recipe-card-content .description {
   font-size: 0.9rem;
-  color: var(--text-light);
+  color: var(--text-muted);
   flex-grow: 1;
   margin-bottom: 1rem;
 }
@@ -214,10 +242,10 @@ header ul li a:hover, header ul li:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border);
   padding-top: 1rem;
   font-size: 0.85rem;
-  color: var(--text-light);
+  color: var(--text-muted);
 }
 
 .like-section {
@@ -226,10 +254,13 @@ header ul li a:hover, header ul li:hover {
   gap: 0.5rem;
 }
 
-.like-section .heart-icon {
-    font-size: 1.2rem;
-    cursor: pointer;
-    transition: color 0.2s ease;
+.card-action-btn {
+  color: var(--text);
+  transition: transform 0.15s ease;
+}
+
+.card-action-btn:hover {
+  transform: scale(1.15);
 }
 
 /* --- 4. Forms & Modal --- */
@@ -239,7 +270,7 @@ header ul li a:hover, header ul li:hover {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--modal-backdrop);
   z-index: 1000;
 }
 
@@ -248,14 +279,15 @@ header ul li a:hover, header ul li:hover {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #fff;
+  background: var(--surface);
+  color: var(--text);
   padding: 2.5rem;
   border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 25px var(--shadow);
   z-index: 1001;
   width: 90%;
   max-width: 450px;
-  border: none;
+  border: 1px solid var(--border);
 }
 
 .form {
@@ -272,28 +304,30 @@ header ul li a:hover, header ul li:hover {
 .form-control label {
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: var(--text-light);
+  color: var(--text-muted);
 }
 
 .form input, .form textarea, .form select {
   padding: 0.8rem 1rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 1rem;
   font-family: var(--font-family);
+  background: var(--input-bg);
+  color: var(--text);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form input:focus, .form textarea:focus, .form select:focus {
   outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(230, 57, 80, 0.2);
 }
 
 .form button {
   padding: 0.9rem;
-  background: var(--primary-color);
-  color: white;
+  background: var(--primary);
+  color: var(--white);
   border: none;
   border-radius: 8px;
   font-size: 1rem;
@@ -322,7 +356,7 @@ header ul li a:hover, header ul li:hover {
   top: 50%;
   transform: translateY(-50%);
   background: transparent !important;
-  color: inherit !important;
+  color: var(--text-muted) !important;
   border: none !important;
   border-radius: 4px;
   padding: 6px !important;
@@ -341,6 +375,7 @@ header ul li a:hover, header ul li:hover {
 
 .form button.password-toggle-btn:hover {
   background: transparent !important;
+  color: var(--text) !important;
   opacity: 0.8;
 }
 
@@ -349,8 +384,64 @@ header ul li a:hover, header ul li:hover {
 }
 
 .form button:disabled {
-  background: #ccc;
+  background: var(--border);
+  color: var(--text-muted);
   cursor: not-allowed;
+}
+
+/* Form container for Add/Edit Recipe */
+.form-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--card-shadow);
+}
+
+.form-container h2 {
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  background: var(--input-bg);
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(230, 57, 80, 0.2);
 }
 
 /* --- 5. Recipe Detail Page --- */
@@ -364,11 +455,12 @@ header ul li a:hover, header ul li:hover {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
+  color: var(--text);
 }
 
 .recipe-detail-header .description {
   font-size: 1.1rem;
-  color: var(--text-light);
+  color: var(--text-muted);
   margin-bottom: 2rem;
 }
 
@@ -378,7 +470,7 @@ header ul li a:hover, header ul li:hover {
   gap: 1.5rem;
   align-items: center;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border);
   margin-bottom: 2rem;
 }
 
@@ -386,30 +478,29 @@ header ul li a:hover, header ul li:hover {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--text-light);
+  color: var(--text-muted);
 }
 
 .author-controls {
-    margin-bottom: 2rem;
-    display: flex;
-    gap: 1rem;
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1rem;
 }
 
 .edit-btn, .delete-btn {
-    padding: 0.7rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    color: #fff;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: var(--white);
 }
 
-.edit-btn { background-color: #007bff; }
-.edit-btn:hover { background-color: #0056b3; }
-.delete-btn { background-color: #dc3545; }
-.delete-btn:hover { background-color: #c82333; }
-
+.edit-btn { background-color: var(--accent); }
+.edit-btn:hover { background-color: var(--primary-hover); }
+.delete-btn { background-color: var(--danger); }
+.delete-btn:hover { background-color: var(--primary); }
 
 .recipe-detail-main img {
   width: 100%;
@@ -417,6 +508,7 @@ header ul li a:hover, header ul li:hover {
   margin-bottom: 2rem;
   max-height: 500px;
   object-fit: cover;
+  border: 1px solid var(--border);
 }
 
 .recipe-content-grid {
@@ -431,24 +523,65 @@ header ul li a:hover, header ul li:hover {
 }
 
 .ingredients-section {
-  background: var(--secondary-color);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.instructions-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 .ingredients-section h2, .instructions-section h2 {
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
+  color: var(--text);
 }
 
 .ingredients-section div, .instructions-section div {
   white-space: pre-line; /* Respect new lines */
   line-height: 2;
+  color: var(--text);
+}
+
+.comments-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.comment-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.comment-author {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.comment-author span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
 /* --- 6. Home Page Header --- */
 .home-header {
   padding: 4rem 2rem;
-  background: linear-gradient(135deg, #6a5acd 0%, #a27cf3 100%);
-  color: white;
+  background: var(--header-gradient);
+  color: var(--white);
   text-align: center;
   border-radius: 0 0 25px 25px;
   margin-bottom: 2rem;
@@ -471,13 +604,16 @@ header ul li a:hover, header ul li:hover {
 
 .filter-controls input, .filter-controls select {
   padding: 0.8rem 1.5rem;
-  border: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
   border-radius: 25px;
   font-size: 1rem;
   outline: none;
   width: auto;
   min-width: 200px;
 }
+
 .filter-controls input {
   flex-grow: 1;
   max-width: 400px;

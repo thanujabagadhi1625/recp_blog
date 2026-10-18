@@ -1,0 +1,100 @@
+/* src/styles/theme.css - Design tokens and theme system */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  color-scheme: dark;
+  --bg: #0f0407;
+  --surface: #1a0a0f;
+  --surface-2: #261016;
+  --border: #3a1823;
+  --text: #f4e8ea;
+  --text-muted: #b79aa0;
+  --primary: #9b111e;
+  --primary-hover: #b3202f;
+  --accent: #e63950;
+  --danger: #ff5d6c;
+  --success: #3ecf8e;
+  --shadow: rgba(0, 0, 0, 0.55);
+  --header-gradient: linear-gradient(135deg, #2a0610 0%, #5c0a17 100%);
+  --glow: 0 0 15px rgba(155, 17, 30, 0.35);
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
+  --card-shadow-hover: 0 8px 30px rgba(155, 17, 30, 0.25);
+  --input-bg: #1a0a0f;
+  --white: #ffffff;
+  --font-family: 'Poppins', sans-serif;
+  --modal-backdrop: rgba(0, 0, 0, 0.75);
+
+  /* Compatibility aliases */
+  --primary-color: var(--primary);
+  --secondary-color: var(--surface-2);
+  --text-dark: var(--text);
+  --text-light: var(--text-muted);
+  --border-color: var(--border);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #fbf3f2;
+  --surface: #ffffff;
+  --surface-2: #f5e9e8;
+  --border: #e6d3d4;
+  --text: #2a1014;
+  --text-muted: #74575b;
+  --primary: #9b111e;
+  --primary-hover: #b3202f;
+  --accent: #e63950;
+  --danger: #d93848;
+  --success: #198754;
+  --shadow: rgba(42, 16, 20, 0.08);
+  --header-gradient: linear-gradient(135deg, #2a0610 0%, #5c0a17 100%);
+  --glow: 0 0 15px rgba(155, 17, 30, 0.15);
+  --card-shadow: 0 4px 15px rgba(42, 16, 20, 0.08);
+  --card-shadow-hover: 0 8px 25px rgba(155, 17, 30, 0.18);
+  --input-bg: #ffffff;
+  --white: #ffffff;
+  --font-family: 'Poppins', sans-serif;
+  --modal-backdrop: rgba(15, 4, 7, 0.65);
+
+  /* Compatibility aliases */
+  --primary-color: var(--primary);
+  --secondary-color: var(--surface-2);
+  --text-dark: var(--text);
+  --text-light: var(--text-muted);
+  --border-color: var(--border);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}

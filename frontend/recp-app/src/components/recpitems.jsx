@@ -8,7 +8,7 @@ function Recpitems({ recipes, onUpdate }) {
   const { user, token, login } = useContext(AuthContext);
 
   if (!recipes || recipes.length === 0)
-    return <h2 style={{textAlign: 'center', marginTop: '80px', color: '#666', fontSize: '24px'}}>No recipes found 🍳</h2>;
+    return <h2 style={{textAlign: 'center', marginTop: '80px', color: 'var(--text-muted)', fontSize: '24px'}}>No recipes found 🍳</h2>;
 
   const handleLike = async (recipeId, e) => {
     e.preventDefault();
@@ -86,7 +86,7 @@ function Recpitems({ recipes, onUpdate }) {
                       aria-label={isLiked ? "Unlike recipe" : "Like recipe"}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}
                     >
-                      {isLiked ? <FaHeart style={{ color: 'red' }} /> : <FaRegHeart style={{ color: '#888' }} />}
+                      {isLiked ? <FaHeart style={{ color: 'var(--accent)' }} /> : <FaRegHeart style={{ color: 'var(--text-muted)' }} />}
                       <span>{item.likes?.length || 0}</span>
                     </button>
                     <button
@@ -96,7 +96,7 @@ function Recpitems({ recipes, onUpdate }) {
                       aria-label={isFavorite ? "Remove from favorites" : "Save to favorites"}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 0 }}
                     >
-                      {isFavorite ? <FaBookmark style={{ color: '#e63950' }} /> : <FaRegBookmark style={{ color: '#888' }} />}
+                      {isFavorite ? <FaBookmark style={{ color: 'var(--accent)' }} /> : <FaRegBookmark style={{ color: 'var(--text-muted)' }} />}
                     </button>
                   </div>
                 </div>

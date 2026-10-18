@@ -44,15 +44,15 @@ const MyRecipes = () => {
         <Recpitems recipes={recipes} onUpdate={fetchUserRecipes} />
       ) : (
         <div style={{ textAlign: "center" }}>
-          <h2 style={{ color: "#666" }}>You haven't added any recipes yet.</h2>
+          <h2 style={{ color: "var(--text-muted)" }}>You haven't added any recipes yet.</h2>
           <Link
             to="/add-recipe"
             style={{
               display: "inline-block",
               marginTop: "20px",
               padding: "12px 25px",
-              background: "#667eea",
-              color: "white",
+              background: "var(--primary)",
+              color: "var(--white)",
               textDecoration: "none",
               borderRadius: "8px",
               fontSize: "18px",

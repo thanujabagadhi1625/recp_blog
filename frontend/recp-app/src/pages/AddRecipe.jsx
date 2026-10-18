@@ -80,12 +80,12 @@ const AddRecipe = () => {
                 role="alert"
                 aria-live="polite"
                 style={{
-                    background: '#fff4e5',
-                    border: '1px solid #ffd1a3',
+                    background: 'var(--surface-2)',
+                    border: '1px solid var(--border)',
                     padding: '10px',
                     borderRadius: '8px',
                     marginBottom: '16px',
-                    color: '#663c00',
+                    color: 'var(--accent)',
                 }}
             >
                 <strong>Warning:</strong> Do not post personal photos or images
@@ -150,7 +150,7 @@ const AddRecipe = () => {
                 <div className="form-group">
                     <label htmlFor="coverImage">Recipe Photo 📷</label>
                     <input type="file" id="coverImage" name="coverImage" onChange={handleFileChange} accept="image/*" />
-                    <p style={{ color: '#a33', fontSize: '0.9rem', marginTop: '6px' }}>
+                    <p style={{ color: 'var(--danger)', fontSize: '0.9rem', marginTop: '6px' }}>
                         Please do not upload personal photos or images that show
                         identifiable people.
                     </p>

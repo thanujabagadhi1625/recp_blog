@@ -81,9 +81,9 @@ const Favorites = () => {
           style={{
             padding: "10px 24px",
             borderRadius: "999px",
-            border: "1px solid #ccc",
-            background: activeTab === "saved" ? "#9b111e" : "transparent",
-            color: activeTab === "saved" ? "#fff" : "inherit",
+            border: "1px solid var(--border)",
+            background: activeTab === "saved" ? "var(--primary)" : "transparent",
+            color: activeTab === "saved" ? "var(--white)" : "inherit",
             cursor: "pointer",
             fontWeight: 600,
             fontSize: "15px",
@@ -104,9 +104,9 @@ const Favorites = () => {
           style={{
             padding: "10px 24px",
             borderRadius: "999px",
-            border: "1px solid #ccc",
-            background: activeTab === "liked" ? "#9b111e" : "transparent",
-            color: activeTab === "liked" ? "#fff" : "inherit",
+            border: "1px solid var(--border)",
+            background: activeTab === "liked" ? "var(--primary)" : "transparent",
+            color: activeTab === "liked" ? "var(--white)" : "inherit",
             cursor: "pointer",
             fontWeight: 600,
             fontSize: "15px",
@@ -125,7 +125,7 @@ const Favorites = () => {
         {currentRecipes.length > 0 ? (
           <Recpitems recipes={currentRecipes} onUpdate={fetchRecipes} />
         ) : (
-          <h2 style={{ textAlign: "center", color: "#666" }}>
+          <h2 style={{ textAlign: "center", color: "var(--text-muted)" }}>
             {activeTab === "saved"
               ? "You haven't saved any recipes to favorites yet."
               : "You haven't liked any recipes yet."}
