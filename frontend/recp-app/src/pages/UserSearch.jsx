@@ -29,7 +29,7 @@ const UserSearch = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by name or email"
+          placeholder="Search by name"
           style={{ flex: 1 }}
         />
         <button onClick={handleSearch} disabled={loading}>{loading ? 'Searching...' : 'Search'}</button>

@@ -18,9 +18,9 @@ const recipeSchema = new mongoose.Schema(
       enum: ['Easy', 'Medium', 'Hard'],
       default: 'Medium'
     },
-    prepTime: { type: Number, default: 0 },
-    cookTime: { type: Number, default: 0 },
-    servings: { type: Number, default: 4 },
+    prepTime: { type: Number, default: 0, min: 0 },
+    cookTime: { type: Number, default: 0, min: 0 },
+    servings: { type: Number, default: 4, min: 1 },
     coverImage: { type: String, default: 'https://via.placeholder.com/400x300?text=Recipe' },
     coverImagePublicId: { type: String },
     tags: [{ type: String }],

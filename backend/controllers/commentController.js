@@ -26,8 +26,11 @@ const getCommentsByRecipe = async (req, res) => {
     });
     return res.status(200).json(nested);
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid recipe ID format' });
+    }
     console.error(err);
-    return res.status(500).json({ error: 'Server error loading comments' });
+    return res.status(500).json({ message: 'Server error loading comments' });
   }
 };
 
@@ -39,7 +42,7 @@ const addComment = async (req, res) => {
       return res.status(400).json({ message: 'Comment text is required.' });
     }
 
-    const recipe = await Recipe.findById(req.params.recipeId);
+    const recipe = req.recipe || await Recipe.findById(req.params.recipeId);
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found.' });
     }
@@ -60,8 +63,11 @@ const addComment = async (req, res) => {
     const savedComment = await comment.save();
     return res.status(201).json(savedComment);
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid ID format' });
+    }
     console.error(err);
-    return res.status(500).json({ error: 'Server error creating comment' });
+    return res.status(500).json({ message: 'Server error creating comment' });
   }
 };
 

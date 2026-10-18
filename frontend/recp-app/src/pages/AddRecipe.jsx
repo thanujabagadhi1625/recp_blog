@@ -48,8 +48,6 @@ const AddRecipe = () => {
         try {
             const payload = {
                 ...formData,
-                author: user.name || 'Unknown Author',
-                userId: user.id || user._id,
                 tags: formData.tags.split(',').map(t => t.trim()).filter(t => t),
             };
 

@@ -1,43 +1,139 @@
-// backend/server.js
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
+
+const { JWT_SECRET, PORT, CLIENT_ORIGIN } = require('./config/env');
 const connectDb = require('./config/connectionDb');
-require('dotenv').config();
+const ChatRequest = require('./models/chatRequest');
 
 const app = express();
-app.use(express.json());
-app.use(cors());
+
+const clientOrigins = CLIENT_ORIGIN
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(helmet());
+app.use(express.json({ limit: '100kb' }));
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || clientOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  })
+);
+
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api', generalLimiter);
 
 connectDb();
 
-// prefix APIs with /api
+// Prefix APIs with /api
 app.use('/api/recipes', require('./routes/recipe'));
 app.use('/api/comments', require('./routes/comment'));
 app.use('/api/chats', require('./routes/chat'));
 app.use('/api/users', require('./routes/user'));
 
-const PORT = process.env.PORT || 4444;
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ message: `Cannot ${req.method} ${req.originalUrl}` });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled application error:', err);
+
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ message: 'Not allowed by CORS' });
+  }
+
+  if (err.name === 'MulterError') {
+    return res.status(400).json({ message: `Upload error: ${err.message}` });
+  }
+
+  if (err.message && (err.message.includes('file type') || err.message.includes('Unsupported file') || err.message.includes('file mismatch'))) {
+    return res.status(400).json({ message: err.message });
+  }
+
+  if (err.name === 'CastError' && err.kind === 'ObjectId') {
+    return res.status(400).json({ message: 'Invalid ID format' });
+  }
+
+  if (err.code === 11000) {
+    return res.status(409).json({ message: 'Duplicate key error' });
+  }
+
+  return res.status(500).json({ message: 'Internal Server Error' });
+});
 
 // Create HTTP server and attach Socket.IO for real-time chat
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*' }
+  cors: {
+    origin: clientOrigins,
+    credentials: true,
+  },
 });
 
-// Expose io via app.locals so controllers can emit events
 app.locals.io = io;
 
+// Socket.IO authentication middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) {
+    return next(new Error('Authentication error: No token provided'));
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    socket.userId = decoded.id;
+    next();
+  } catch (err) {
+    return next(new Error('Authentication error: Invalid or expired token'));
+  }
+});
+
 io.on('connection', (socket) => {
-  socket.on('join', (room) => {
-    if (room) socket.join(room);
+  socket.on('join', async (room) => {
+    if (!room || !mongoose.isValidObjectId(room)) return;
+    try {
+      const chatRequest = await ChatRequest.findById(room);
+      if (
+        chatRequest &&
+        chatRequest.status === 'accepted' &&
+        [chatRequest.senderId.toString(), chatRequest.receiverId.toString()].includes(socket.userId)
+      ) {
+        socket.join(room);
+      }
+    } catch (err) {
+      console.error('Socket join error:', err);
+    }
   });
+
   socket.on('leave', (room) => {
     if (room) socket.leave(room);
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+}
+
+module.exports = { app, server, io };

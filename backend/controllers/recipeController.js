@@ -75,8 +75,11 @@ const getRecipe = async (req, res) => {
         recipeObj.coverImage = getFullImageUrl(req, recipeObj.coverImage);
         return res.status(200).json(recipeObj);
     } catch (err) {
+        if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid recipe ID format' });
+        }
         console.error(err);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -95,7 +98,6 @@ const addRecipe = async (req, res) => {
         difficulty
     } = req.body;
 
-    const author = req.body.author || req.userName || 'Anonymous';
     const userId = req.userId;
 
     if (!title || !description || !userId) {
@@ -109,6 +111,8 @@ const addRecipe = async (req, res) => {
     }
 
     try {
+        const user = await User.findById(userId);
+        const author = user ? user.name : 'Anonymous';
         const coverImage = req.file.cloudinaryUrl;
         const parsedTags = parseTags(tags);
         const newRecipe = new Recipe({
@@ -130,18 +134,17 @@ const addRecipe = async (req, res) => {
         });
 
         const savedRecipe = await newRecipe.save();
-        
         res.status(201).json(savedRecipe);
 
     } catch (error) {
-        console.error('Error creating recipe:', error.message);
+        console.error('Error creating recipe:', error);
         if (error.name === 'ValidationError') {
             return res.status(400).json({ 
-                message: error.message,
+                message: 'Validation failed',
                 details: error.errors 
             });
         }
-        res.status(500).json({ message: 'Internal Server Error during recipe creation.', error: error.message });
+        res.status(500).json({ message: 'Internal Server Error during recipe creation.' });
     }
 };
 
@@ -157,7 +160,27 @@ const editRecipe = async (req, res) => {
             return res.status(403).json({ message: 'Not authorized to edit this recipe' });
         }
 
-        const updateFields = { ...req.body };
+        const allowedFields = [
+            'title',
+            'description',
+            'ingredients',
+            'instructions',
+            'category',
+            'cuisine',
+            'difficulty',
+            'prepTime',
+            'cookTime',
+            'servings',
+            'tags',
+            'coverImage',
+        ];
+        const updateFields = {};
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                updateFields[field] = req.body[field];
+            }
+        }
+
         if (req.file) {
             updateFields.coverImage = req.file.cloudinaryUrl;
             updateFields.coverImagePublicId = req.file.cloudinaryPublicId;
@@ -177,8 +200,11 @@ const editRecipe = async (req, res) => {
         const updated = await Recipe.findByIdAndUpdate(req.params.id, updateFields, { new: true, runValidators: true });
         return res.status(200).json(updated);
     } catch (err) {
+        if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid recipe ID format' });
+        }
         console.error(err);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -206,8 +232,11 @@ const deleteRecipe = async (req, res) => {
         await Recipe.findByIdAndDelete(req.params.id);
         return res.status(200).json({ message: 'Recipe deleted' });
     } catch (err) {
+        if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid recipe ID format' });
+        }
         console.error(err);
-        return res.status(500).json({ error: 'Error in deleting the recipe' });
+        return res.status(500).json({ message: 'Error in deleting the recipe' });
     }
 };
 
@@ -240,8 +269,11 @@ const likeRecipe = async (req, res) => {
             return res.status(200).json({ likes: updatedRecipe.likes.length, liked: true });
         }
     } catch (err) {
+        if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid recipe ID format' });
+        }
         console.error(err);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -272,8 +304,11 @@ const dislikeRecipe = async (req, res) => {
             return res.status(200).json({ dislikes: updatedRecipe.dislikes.length, disliked: true });
         }
     } catch (err) {
+        if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid recipe ID format' });
+        }
         console.error(err);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -289,8 +324,11 @@ const getUserRecipes = async (req, res) => {
         });
         return res.status(200).json(mapped);
     } catch (err) {
+        if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'Invalid user ID format' });
+        }
         console.error(err);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ message: 'Server error' });
     }
 };
 

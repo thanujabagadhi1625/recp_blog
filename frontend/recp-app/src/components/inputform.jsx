@@ -44,9 +44,9 @@ function Inputform({ setIsOpen }) {
       )}
 
       <div className="form-control">
-        <label>{isSignup ? 'Email' : 'Email or Username'}</label>
+        <label>Email</label>
         <input
-          type="text"
+          type="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}

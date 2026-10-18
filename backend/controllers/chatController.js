@@ -44,8 +44,11 @@ const sendChatRequest = async (req, res) => {
     const request = await ChatRequest.create({ senderId: req.userId, receiverId });
     return res.status(201).json(request);
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid receiver ID format' });
+    }
     console.error(err);
-    return res.status(500).json({ error: 'Server error creating chat request' });
+    return res.status(500).json({ message: 'Server error creating chat request' });
   }
 };
 
@@ -69,8 +72,11 @@ const respondToChatRequest = async (req, res) => {
     await request.save();
     return res.status(200).json(request);
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid chat request ID format' });
+    }
     console.error(err);
-    return res.status(500).json({ error: 'Server error responding to chat request' });
+    return res.status(500).json({ message: 'Server error responding to chat request' });
   }
 };
 
@@ -81,7 +87,7 @@ const getChatRequests = async (req, res) => {
     return res.status(200).json(requests);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'Server error fetching chat requests' });
+    return res.status(500).json({ message: 'Server error fetching chat requests' });
   }
 };
 
@@ -101,8 +107,11 @@ const getMessages = async (req, res) => {
       .sort({ createdAt: 1 });
     return res.status(200).json(messages);
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid chat request ID format' });
+    }
     console.error(err);
-    return res.status(500).json({ error: 'Server error fetching messages' });
+    return res.status(500).json({ message: 'Server error fetching messages' });
   }
 };
 
@@ -141,8 +150,11 @@ const sendMessage = async (req, res) => {
 
     return res.status(201).json(savedMessage);
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid chat request ID format' });
+    }
     console.error(err);
-    return res.status(500).json({ error: 'Server error sending message' });
+    return res.status(500).json({ message: 'Server error sending message' });
   }
 };
 
@@ -152,7 +164,7 @@ const getChatRooms = async (req, res) => {
     const rooms = await ChatRequest.find({
       status: 'accepted',
       $or: [{ senderId: userId }, { receiverId: userId }]
-    }).populate('senderId receiverId', 'name avatar email');
+    }).populate('senderId receiverId', 'name avatar');
 
     const mapped = rooms.map(r => {
       const other = r.senderId._id.toString() === userId ? r.receiverId : r.senderId;
@@ -162,7 +174,6 @@ const getChatRooms = async (req, res) => {
           id: other._id,
           name: other.name,
           avatar: other.avatar,
-          email: other.email,
         },
         createdAt: r.createdAt
       };
@@ -171,7 +182,7 @@ const getChatRooms = async (req, res) => {
     return res.status(200).json(mapped);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'Server error fetching chat rooms' });
+    return res.status(500).json({ message: 'Server error fetching chat rooms' });
   }
 };
 

@@ -32,7 +32,7 @@ const ChatRoom = () => {
   // Socket.IO real-time updates
   const socketRef = useRef();
   useEffect(() => {
-    socketRef.current = io('http://localhost:4444');
+    socketRef.current = io('http://localhost:4444', { auth: { token } });
     socketRef.current.emit('join', requestId);
     socketRef.current.on('new_message', (msg) => {
       setMessages((prev) => {
@@ -46,7 +46,7 @@ const ChatRoom = () => {
         socketRef.current.disconnect();
       }
     };
-  }, [requestId]);
+  }, [requestId, token]);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
