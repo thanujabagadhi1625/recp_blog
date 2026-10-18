@@ -155,9 +155,28 @@ const validateChatMessage = [
 
 const validateProfile = [
   body('avatar')
-    .optional({ checkFalsy: true })
-    .isURL({ protocols: ['https'], require_protocol: true })
-    .withMessage('Avatar must be a valid https URL'),
+    .optional({ values: 'undefined' })
+    .custom((value) => {
+      if (value === '' || value === null) {
+        return true;
+      }
+      if (typeof value !== 'string') {
+        throw new Error('Avatar must be an https URL or empty string');
+      }
+      const trimmed = value.trim();
+      if (trimmed === '') {
+        return true;
+      }
+      try {
+        const parsed = new URL(trimmed);
+        if (parsed.protocol === 'https:') {
+          return true;
+        }
+      } catch (e) {
+        // invalid URL
+      }
+      throw new Error('Avatar must be an https URL or empty string');
+    }),
   body('bio')
     .optional()
     .isLength({ max: 200 })

@@ -167,8 +167,29 @@ const updateProfile = async (req, res) => {
     const { avatar, bio, favoriteCuisines, hobbies } = req.body;
     const user = await User.findById(req.userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
-
-    if (avatar) user.avatar = avatar;
+    if (avatar !== undefined) {
+      if (avatar === '' || avatar === null) {
+        user.avatar = '';
+      } else if (typeof avatar === 'string') {
+        const trimmed = avatar.trim();
+        if (trimmed === '') {
+          user.avatar = '';
+        } else {
+          try {
+            const parsed = new URL(trimmed);
+            if (parsed.protocol === 'https:') {
+              user.avatar = trimmed;
+            } else {
+              return res.status(400).json({ message: 'Avatar must be an https URL or empty string' });
+            }
+          } catch {
+            return res.status(400).json({ message: 'Avatar must be an https URL or empty string' });
+          }
+        }
+      } else {
+        return res.status(400).json({ message: 'Avatar must be an https URL or empty string' });
+      }
+    }
     if (bio !== undefined) user.bio = bio;
     if (favoriteCuisines !== undefined) {
       user.favoriteCuisines = Array.isArray(favoriteCuisines)
