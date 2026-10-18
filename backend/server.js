@@ -50,7 +50,20 @@ function createApp(options = {}) {
 
   // Health check endpoint
   app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'ok', uptime: process.uptime() });
+    const readyState = mongoose.connection.readyState;
+    const database = readyState === 1 ? 'connected' : readyState === 2 ? 'connecting' : 'disconnected';
+    if (database === 'connected') {
+      return res.status(200).json({
+        status: 'ok',
+        uptime: process.uptime(),
+        database,
+      });
+    }
+    return res.status(503).json({
+      status: 'degraded',
+      uptime: process.uptime(),
+      database,
+    });
   });
 
   // Prefix APIs with /api

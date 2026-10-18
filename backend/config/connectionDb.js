@@ -6,8 +6,14 @@ const connectDb = async () => {
     await mongoose.connect(MONGO_URL);
     console.log('✅ Mongoose connected');
   } catch (err) {
-    console.error('❌ Mongo connection error:', err);
-    process.exit(1);
+    const errorMsg = err?.message || String(err);
+    console.error(
+      'MongoDB connection failed. Check that your current IP is on the Atlas Network Access list and that the cluster is not paused.',
+      errorMsg
+    );
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(1);
+    }
   }
 };
 

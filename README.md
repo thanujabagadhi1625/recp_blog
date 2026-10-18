@@ -224,6 +224,18 @@ npm run build
 
 ---
 
+## 📋 Before a Demo or Interview Checklist
+
+Complete these 5 verification steps prior to running a live demo or technical interview walkthrough:
+
+1. **Atlas Network Access:** Add your current public IP address to the MongoDB Atlas Network Access IP allowlist (or `0.0.0.0/0` temporarily for demo day).
+2. **Cluster Availability:** Confirm that your MongoDB Atlas cluster is active and not paused due to inactivity.
+3. **Automated Verification:** Run `npm test` in `/backend` and `npm test` in `/frontend/recp-app` to confirm all suites are green.
+4. **Health Check Validation:** Start the backend (`npm run dev`) and verify that `curl http://localhost:4444/api/health` returns HTTP 200 with `status: "ok"` and `database: "connected"`.
+5. **Real-Time Multi-User Chat:** Open `http://localhost:5173` across two separate browser sessions (e.g. Standard Chrome and Incognito, or Firefox) to demonstrate real-time direct messaging, chat requests, and notifications.
+
+---
+
 ## ⚠️ Known Limitations
 
 - **Email Uniqueness on Signup:** Email addresses must be unique; social login (OAuth/Google) is not yet integrated.

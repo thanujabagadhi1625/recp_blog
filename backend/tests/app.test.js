@@ -55,11 +55,25 @@ describe('Backend Test Suite', () => {
   });
 
   describe('Health Endpoint', () => {
-    it('returns 200 with status ok and uptime', async () => {
+    it('returns 200 with status ok, uptime, and database connected', async () => {
       const res = await request(app).get('/api/health');
       expect(res.status).toBe(200);
       expect(res.body.status).toBe('ok');
       expect(typeof res.body.uptime).toBe('number');
+      expect(res.body.database).toBe('connected');
+    });
+
+    it('returns 503 with status degraded when database is not connected', async () => {
+      await mongoose.disconnect();
+      try {
+        const res = await request(app).get('/api/health');
+        expect(res.status).toBe(503);
+        expect(res.body.status).toBe('degraded');
+        expect(res.body.database).toBe('disconnected');
+        expect(typeof res.body.uptime).toBe('number');
+      } finally {
+        await mongoose.connect(mongoServer.getUri());
+      }
     });
   });
 
