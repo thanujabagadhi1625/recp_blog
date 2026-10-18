@@ -38,10 +38,18 @@ const generalLimiter = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
 });
 app.use('/api', generalLimiter);
 
-connectDb();
+if (process.env.NODE_ENV !== 'test') {
+  connectDb();
+}
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
 
 // Prefix APIs with /api
 app.use('/api/recipes', require('./routes/recipe'));

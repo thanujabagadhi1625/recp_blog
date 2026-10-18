@@ -13,3 +13,7 @@
 
 # System Files
 .DS_Store
+
+# Uploads
+uploads/
+/backend/uploads/

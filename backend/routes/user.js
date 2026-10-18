@@ -25,6 +25,7 @@ const authLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 router.post('/signup', authLimiter, validateSignup, userSignup);
