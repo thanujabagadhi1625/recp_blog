@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import client from '../api/client';
+import client, { API_URL } from '../api/client';
 import { AuthContext } from '../context/AuthContext';
 import { io } from 'socket.io-client';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4444';
 
 const ChatRoom = () => {
   const { requestId } = useParams();
