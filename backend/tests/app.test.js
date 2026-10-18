@@ -478,6 +478,93 @@ describe('Backend Test Suite', () => {
     });
   });
 
+  describe('Like vs Favorite Independence', () => {
+    let tokenUser;
+    let userId;
+    let recipe1;
+
+    beforeEach(async () => {
+      const res = await request(app)
+        .post('/api/users/signup')
+        .send({ name: 'Like Fav User', email: 'likefav@example.com', password: 'password123' });
+      tokenUser = res.body.token;
+      userId = res.body.user.id;
+
+      recipe1 = await Recipe.create({
+        title: 'Recipe 1',
+        description: 'First recipe',
+        ingredients: 'Salt',
+        instructions: 'Cook',
+        category: 'Dinner',
+        cuisine: 'American',
+        difficulty: 'Easy',
+        author: 'Like Fav User',
+        userId,
+        coverImage: 'https://example.com/1.jpg',
+      });
+
+      await Recipe.create({
+        title: 'Recipe 2',
+        description: 'Second recipe',
+        ingredients: 'Pepper',
+        instructions: 'Bake',
+        category: 'Lunch',
+        cuisine: 'French',
+        difficulty: 'Easy',
+        author: 'Like Fav User',
+        userId,
+        coverImage: 'https://example.com/2.jpg',
+      });
+    });
+
+    it('liking does not change favorites', async () => {
+      const likeRes = await request(app)
+        .post(`/api/recipes/${recipe1._id}/like`)
+        .set('Authorization', `Bearer ${tokenUser}`);
+      expect(likeRes.status).toBe(200);
+      expect(likeRes.body.liked).toBe(true);
+      expect(likeRes.body.likes).toBe(1);
+
+      const user = await User.findById(userId);
+      expect(user.favorites).toHaveLength(0);
+
+      const updatedRecipe = await Recipe.findById(recipe1._id);
+      expect(updatedRecipe.likes.map((id) => id.toString())).toContain(userId.toString());
+    });
+
+    it('adding a favorite does not change likes', async () => {
+      const favRes = await request(app)
+        .post(`/api/users/favorites/${recipe1._id}`)
+        .set('Authorization', `Bearer ${tokenUser}`);
+      expect(favRes.status).toBe(200);
+
+      const user = await User.findById(userId);
+      expect(user.favorites.map((id) => id.toString())).toContain(recipe1._id.toString());
+
+      const recipe = await Recipe.findById(recipe1._id);
+      expect(recipe.likes).toHaveLength(0);
+    });
+
+    it('GET /api/recipes/liked/me returns only liked recipes and never exposes emails', async () => {
+      await request(app)
+        .post(`/api/recipes/${recipe1._id}/like`)
+        .set('Authorization', `Bearer ${tokenUser}`);
+
+      const res = await request(app)
+        .get('/api/recipes/liked/me')
+        .set('Authorization', `Bearer ${tokenUser}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0]._id.toString()).toBe(recipe1._id.toString());
+      expect(res.body[0].title).toBe('Recipe 1');
+      expect(res.body[0].userId).toBeDefined();
+      expect(res.body[0].userId).toHaveProperty('name', 'Like Fav User');
+      expect(res.body[0].userId).not.toHaveProperty('email');
+    });
+  });
+
   describe('Chat Request Lifecycle', () => {
     let senderToken;
     let senderId;

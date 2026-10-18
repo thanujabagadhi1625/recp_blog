@@ -261,7 +261,6 @@ const likeRecipe = async (req, res) => {
                 { $pull: { likes: req.userId } },
                 { new: true }
             );
-            await User.findByIdAndUpdate(req.userId, { $pull: { favorites: recipe._id } });
             return res.status(200).json({ likes: updatedRecipe.likes.length, liked: false });
         } else {
             updatedRecipe = await Recipe.findByIdAndUpdate(
@@ -272,13 +271,31 @@ const likeRecipe = async (req, res) => {
                 },
                 { new: true }
             );
-            await User.findByIdAndUpdate(req.userId, { $addToSet: { favorites: recipe._id } });
             return res.status(200).json({ likes: updatedRecipe.likes.length, liked: true });
         }
     } catch (err) {
         if (err.name === 'CastError') {
             return res.status(400).json({ message: 'Invalid recipe ID format' });
         }
+        console.error(err);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+const getLikedRecipes = async (req, res) => {
+    try {
+        const recipes = await Recipe.find({ likes: req.userId })
+            .sort({ createdAt: -1 })
+            .populate('userId', 'name avatar');
+
+        const items = recipes.map((recipe) => {
+            const recipeObj = recipe.toObject();
+            recipeObj.coverImage = recipeObj.coverImage || '';
+            return recipeObj;
+        });
+
+        return res.status(200).json(items);
+    } catch (err) {
         console.error(err);
         return res.status(500).json({ message: 'Server error' });
     }
@@ -347,5 +364,6 @@ module.exports = {
     deleteRecipe, 
     likeRecipe, 
     dislikeRecipe,
-    getUserRecipes 
+    getUserRecipes,
+    getLikedRecipes,
 };

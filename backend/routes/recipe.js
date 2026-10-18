@@ -16,9 +16,11 @@ const {
   likeRecipe,
   dislikeRecipe,
   getUserRecipes,
+  getLikedRecipes,
 } = require('../controllers/recipeController');
 
 router.get('/', getRecipes);
+router.get('/liked/me', authMiddleware, getLikedRecipes);
 router.get('/user/:userId', validateObjectId('userId'), getUserRecipes);
 router.get('/:id', validateObjectId('id'), getRecipe);
 

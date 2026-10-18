@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import client from "../api/client";
 import { AuthContext } from "../context/AuthContext";
-import { FaClock, FaUserFriends, FaGlobe, FaHeart, FaEdit, FaTrash } from "react-icons/fa";
+import { FaClock, FaUserFriends, FaGlobe, FaHeart, FaRegHeart, FaBookmark, FaRegBookmark, FaEdit, FaTrash } from "react-icons/fa";
 
 const RecipeDetail = () => {
     const [recipe, setRecipe] = useState(null);
@@ -171,12 +171,43 @@ const RecipeDetail = () => {
                 <div className="stat-item"><FaClock /> {recipe.cookTime} min (Cook)</div>
                 <div className="stat-item"><FaUserFriends /> Serves {recipe.servings}</div>
                 {recipe.cuisine && <div className="stat-item"><FaGlobe /> {recipe.cuisine}</div>}
-                <div className="stat-item" onClick={handleLikeRecipe} style={{ cursor: 'pointer' }}>
-                    <FaHeart style={{ color: recipe.likes?.includes(user?.id) ? 'red' : '#888' }} /> {recipe.likes?.length || 0}
-                </div>
-                <div className="stat-item" onClick={handleDislikeRecipe} style={{ cursor: 'pointer' }}>
-                    <FaHeart style={{ transform: 'rotate(180deg)', color: recipe.dislikes?.includes(user?.id) ? 'blue' : '#888' }} /> {recipe.dislikes?.length || 0}
-                </div>
+                <button
+                    type="button"
+                    className="stat-item stat-item-btn"
+                    onClick={handleLikeRecipe}
+                    aria-label={recipe.likes?.includes(user?.id) ? "Unlike recipe" : "Like recipe"}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                    {recipe.likes?.includes(user?.id) ? (
+                        <FaHeart style={{ color: 'red' }} />
+                    ) : (
+                        <FaRegHeart style={{ color: '#888' }} />
+                    )}
+                    <span>{recipe.likes?.length || 0}</span>
+                </button>
+                <button
+                    type="button"
+                    className="stat-item stat-item-btn"
+                    onClick={handleToggleFavorite}
+                    aria-label={isFavorite ? "Remove from favorites" : "Save to favorites"}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                    {isFavorite ? (
+                        <FaBookmark style={{ color: '#e63950' }} />
+                    ) : (
+                        <FaRegBookmark style={{ color: '#888' }} />
+                    )}
+                </button>
+                <button
+                    type="button"
+                    className="stat-item stat-item-btn"
+                    onClick={handleDislikeRecipe}
+                    aria-label={recipe.dislikes?.includes(user?.id) ? "Remove dislike" : "Dislike recipe"}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                    <FaHeart style={{ transform: 'rotate(180deg)', color: recipe.dislikes?.includes(user?.id) ? 'blue' : '#888' }} />
+                    <span>{recipe.dislikes?.length || 0}</span>
+                </button>
             </div>
 
             {isAuthor && (
@@ -187,9 +218,6 @@ const RecipeDetail = () => {
             )}
             {user && (
                 <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
-                    <button onClick={handleToggleFavorite} className="favorite-btn">
-                        {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                    </button>
                     <button onClick={() => {
                         navigator.clipboard.writeText(window.location.href);
                         alert('Recipe link copied to clipboard!');
